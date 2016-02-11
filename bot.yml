@@ -1,0 +1,14 @@
+name: sdbot
+description: A bot that gives the user joy to use Server Density
+avatar: assets/sdlogo.png
+background:
+config:
+  - name: SD_AUTH_TOKEN
+    friendly_name: Token
+    info: The Server Density Auth Token
+    type: secret
+  - name: ACCESS_TOKEN
+    friendly_name: Slack access token
+    info: It's the access token the bot owner has.
+    type: secret
+    global: true
