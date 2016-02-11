@@ -13,11 +13,7 @@ from serverdensity.wrapper import Metrics
 
 from limbo.plugins.common.basewrapper import BaseWrapper
 
-BASEURL = 'https://api.serverdensity.io/'
-
-
 COMMANDS = ['find', 'value', 'available']
-TOKEN = '8e252354ccecb6509421ced215b33770'
 
 
 class Wrapper(BaseWrapper):
