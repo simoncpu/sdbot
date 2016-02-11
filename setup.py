@@ -18,7 +18,7 @@ required = ['requests>=2.5', 'websocket-client==0.32.0',
 if not PYTHON3:
     required += ['importlib>=1.0.3']
 
-packages = ['limbo', 'limbo.plugins']
+packages = ['limbo', 'limbo.plugins', 'limbo.plugins.common']
 
 try:
     longdesc = open("README.rs").read()

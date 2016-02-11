@@ -11,6 +11,7 @@ import sqlite3
 import sys
 import time
 import traceback
+import json
 
 from slackrtm import SlackClient
 from slackrtm.server import SlackConnectionError, SlackLoginError
@@ -82,8 +83,9 @@ def init_plugins(plugindir, plugins_to_load=None):
                 hooks.setdefault(hook, []).append(hookfun)
 
             if mod.__doc__:
-                firstline = mod.__doc__.split('\n')[0]
-                hooks.setdefault('help', {})[modname] = firstline
+                # firstline = mod.__doc__.split('\n')[0]
+                part_attachment = json.loads(mod.__doc__)
+                hooks.setdefault('help', {})[modname] = part_attachment
                 hooks.setdefault('extendedhelp', {})[modname] = mod.__doc__
 
         # bare except, because the modules could raise any number of errors
@@ -107,7 +109,6 @@ def run_hook(hooks, hook, *args):
             logger.warning("Failed to run plugin {0}, module not loaded".format(hook))
             logger.warning("{0}".format(sys.exc_info()[0]))
             logger.warning("{0}".format(traceback.format_exc()))
-
     return responses
 
 def handle_bot_message(event, server):
@@ -135,8 +136,18 @@ def handle_message(event, server):
 
     return "\n".join(run_hook(server.hooks, "message", event, server))
 
+def handle_hello(event, server):
+    import pdb; pdb.set_trace()
+    return "".join(run_hook(server.hooks, "hello", event, server))
+
+def handle_channel_joined(event, server):
+    temp = "".join(run_hook(server.hooks, "channel_joined", event, server))
+    return temp
+
+
 event_handlers = {
     "message": handle_message,
+    'channel_joined': handle_channel_joined
 }
 
 def handle_event(event, server):
@@ -176,7 +187,11 @@ def loop(server, test_loop=None):
                 logger.debug("got {0}".format(event.get("type", event)))
                 response = handle_event(event, server)
                 if response:
-                    server.slack.rtm_send_message(event["channel"], response)
+                    if isinstance(event['channel'], dict):
+                        channel_id = event['channel']['id']
+                    else:
+                        channel_id = event['channel']
+                    server.slack.rtm_send_message(channel_id, response)
 
             # Run the loop hook. This doesn't send messages it receives,
             # because it doesn't know where to send them. Use
@@ -203,7 +218,7 @@ def loop(server, test_loop=None):
                 test_loop -= 1
     except KeyboardInterrupt:
         if os.environ.get("LIMBO_DEBUG"):
-            import ipdb; ipdb.set_trace()
+            import pdb; pdb.set_trace()
         raise
 
 def relevant_environ():
