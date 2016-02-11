@@ -8,9 +8,8 @@ import re
 import json
 from datetime import datetime
 from datetime import timedelta
-import requests
 from serverdensity.wrapper import Device
-
+from serverdensity.wrapper import Metrics
 
 from limbo.plugins.common.basewrapper import BaseWrapper
 
@@ -25,6 +24,7 @@ class Wrapper(BaseWrapper):
     def __init__(self):
         super(Wrapper, self).__init__()
         self.device = Device(self.token)
+        self.metrics = Metrics(self.token)
 
     def results_of(self, command, metrics, name):
         if command == 'find':
@@ -72,7 +72,7 @@ class Wrapper(BaseWrapper):
         metrics = list(metrics)
         if not filter:
             filter = {}
-            filter[metrics.pop()] = 'ALL'
+            filter[metrics.pop()] = 'all'
             return self.metric_filter(metrics, filter)
         else:
             try:
@@ -86,7 +86,7 @@ class Wrapper(BaseWrapper):
         if not names:
             names = []
         for d in data:
-            if d.get('data'):
+            if d.get('data') or d.get('data') == []:
                 names.append(d.get('name'))
                 return d, names
             else:
@@ -94,7 +94,7 @@ class Wrapper(BaseWrapper):
                 return self.get_data(d.get('tree'), names)
 
     def get_value(self, name, metrics):
-        devices = self.devices.list()
+        devices = self.device.list()
         _id = self.find_id(name, [], devices)
         if not _id:
             return 'I couldn\'t find your device'
@@ -104,24 +104,19 @@ class Wrapper(BaseWrapper):
 
         now = datetime.now()
         past30 = now - timedelta(minutes=35)
-        params = {
-            'start': past30.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'end': now.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'token': TOKEN,
-            'filter': json.dumps(filter)
-        }
 
-        metrics = requests.get(BASEURL + 'metrics/graphs/' + _id,
-                               params=params)
-        device, names = self.get_data(metrics.json())
+        metrics = self.metrics.get(_id, past30, now, filter)
+        device, names = self.get_data(metrics)
+        if not device.get('data'):
+            return 'Could not find any data for these metrics'
         result = {
-            'title': name,
+            'title': 'Device name: {}'.format(name),
             'text': ' > '.join(names),
             'color': '#F9F19A',
             'fields': [
                 {
                     'title': 'Latest Value',
-                    'value': '{}{}'.format(device['data'][-1]['y'], device['unit']),
+                    'value': '{}{}'.format(device['data'][-1]['y'], device.get('units', '')),
                     'short': True
                 }
             ]
@@ -138,21 +133,14 @@ class Wrapper(BaseWrapper):
                     yield [key] + result
 
     def get_available(self, name):
-        devices = self.devices.list()
+        devices = self.device.list()
         _id = self.find_id(name, [], devices)
 
         now = datetime.now()
         past30 = now - timedelta(minutes=120)
 
-        params = {
-            'token': TOKEN,
-            'start': past30.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'end': now.strftime('%Y-%m-%dT%H:%M:%SZ')
-        }
-
-        metrics = requests.get(BASEURL + 'metrics/definitions/' + _id,
-            params=params)
-        available = list(self.flatten(metrics.json()))
+        metrics = self.metrics.available(_id, past30, now)
+        available = list(self.flatten(metrics))
         text = ''
         for a in available:
             text += ' > '.join(a) + '\n'
