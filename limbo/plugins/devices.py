@@ -9,6 +9,9 @@ import json
 from datetime import datetime
 from datetime import timedelta
 import requests
+from serverdensity.wrapper import Device
+
+
 from limbo.plugins.common.basewrapper import BaseWrapper
 
 BASEURL = 'https://api.serverdensity.io/'
@@ -20,7 +23,8 @@ TOKEN = '8e252354ccecb6509421ced215b33770'
 
 class Wrapper(BaseWrapper):
     def __init__(self):
-        pass
+        super(Wrapper, self).__init__()
+        self.device = Device(self.token)
 
     def results_of(self, command, metrics, name):
         if command == 'find':
@@ -32,17 +36,17 @@ class Wrapper(BaseWrapper):
         return result
 
     def find_device(self, name):
-        results = requests.get(BASEURL + 'inventory/devices?token=' + TOKEN)
-        in_json = results.json()
+        results = self.device.list()
+
         if not name:
             msg = 'Here are all the devices that I found'
-            device_list = "\n".join([device['name'] for device in in_json])
+            device_list = "\n".join([device['name'] for device in results])
             result = msg + '\n```' + device_list + '```'
             return result
 
         # list expression
         devices = [{
-            'text': '**Device Name**: {}'.format(device['name']),
+            'text': '*Device Name*: {}'.format(device['name']),
             'color': '#A3B0CA',
             'mrkdwn_in': ['text'],
             'fields': [{
@@ -52,7 +56,7 @@ class Wrapper(BaseWrapper):
                 },
                 {
                     'title': 'Provider',
-                    'value': device.get('provider', 'None'),
+                    'value': device.get('provider') if device.get('provider') else 'No provider',
                     'short': True
                 },
                 {
@@ -61,7 +65,7 @@ class Wrapper(BaseWrapper):
                     'short': True
                 }
             ]
-        } for device in in_json if device['name'] == name]
+        } for device in results if device['name'] == name]
         return devices
 
     def metric_filter(self, metrics, filter=None):
@@ -90,8 +94,8 @@ class Wrapper(BaseWrapper):
                 return self.get_data(d.get('tree'), names)
 
     def get_value(self, name, metrics):
-        devices = requests.get(BASEURL + 'inventory/devices?token=' + TOKEN)
-        _id = self.find_id(name, [], devices.json())
+        devices = self.devices.list()
+        _id = self.find_id(name, [], devices)
         if not _id:
             return 'I couldn\'t find your device'
 
@@ -134,8 +138,8 @@ class Wrapper(BaseWrapper):
                     yield [key] + result
 
     def get_available(self, name):
-        devices = requests.get(BASEURL + 'inventory/devices?token=' + TOKEN)
-        _id = self.find_id(name, [], devices.json())
+        devices = self.devices.list()
+        _id = self.find_id(name, [], devices)
 
         now = datetime.now()
         past30 = now - timedelta(minutes=120)

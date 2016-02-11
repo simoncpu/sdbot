@@ -7,8 +7,3 @@ config:
     friendly_name: Token
     info: The Server Density Auth Token
     type: secret
-  - name: SLACK_TOKEN
-    friendly_name: Slack access token
-    info: It's the access token the bot owner has.
-    type: secret
-    global: true
