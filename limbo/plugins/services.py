@@ -1,6 +1,6 @@
 """{
     "title": "services <command> <name> (<period>)",
-    "text": "You can get more info about your services through commands such as `find`, `status` or `value`",
+    "text": "You can get more info about your services through commands such as `status` or `value`",
     "mrkdwn_in": ["text"],
     "color": "#F9F19A"
 }"""
