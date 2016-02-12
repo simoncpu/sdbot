@@ -5,21 +5,28 @@
     "color": "#F9F19A"
 }"""
 
-from limbo.plugins.common.basewrapper import BaseWrapper
 import json
 import requests
 import re
+
 from datetime import timedelta
 from datetime import datetime
 
+from serverdensity.wrapper import Service
+from serverdensity.wrapper import Metrics
+from serverdensity.wrapper import ServiceStatus
+from limbo.plugins.common.basewrapper import BaseWrapper
 
-COMMANDS = ['status', 'value', 'services']
-TOKEN = '8e252354ccecb6509421ced215b33770'
+COMMANDS = ['status', 'value']
 BASEURL = 'https://api.serverdensity.io/'
 
 
 class Wrapper(BaseWrapper):
     def __init__(self, msg, server):
+        super(Wrapper, self).__init__()
+        self.service = Service(self.token)
+        self.metrics = Metrics(self.token)
+        self.status = ServiceStatus(self.token)
         self.server = server
         self.msg = msg
 
@@ -31,28 +38,20 @@ class Wrapper(BaseWrapper):
         return result
 
     def get_value(self, name):
-        services = requests.get(BASEURL + 'inventory/services?token=' + TOKEN)
-        _id = self.find_id(name, services.json(), [])
+        services = self.service.list()
+        _id = self.find_id(name, services, [])
         if not _id:
             return 'I couldn\'t find your service'
-        service = requests.get(BASEURL + 'inventory/services/' + _id,
-            params={'token': TOKEN})
-        locations = service.json()['checkLocations']
+        service = self.service.view(_id)
+        locations = service['checkLocations']
         all_results = []
         for location in locations:
             filtered = {'time': {location: 'all'}}
             now = datetime.now()
             past30 = now - timedelta(minutes=35)
 
-            params = {
-                'start': past30.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'end': now.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'filter': json.dumps(filtered),
-                'token': TOKEN
-            }
-
-            metrics = requests.get(BASEURL + 'metrics/graphs/' + _id, params=params)
-            service = metrics.json()[0]['tree'][0]
+            metrics = self.metrics.get(_id, past30, now, filtered)
+            service = metrics[0]['tree'][0]
             data = service['data']
 
             latest = '{}s'.format(round(data[-1]['y'], 3))
@@ -84,15 +83,15 @@ class Wrapper(BaseWrapper):
                 return node['name']
 
     def get_status(self, name):
-        services = requests.get(BASEURL + 'inventory/services?token=' + TOKEN)
-        _id = self.find_id(name, services.json(), [])
+        services = self.service.list()
+        _id = self.find_id(name, services, [])
         if not _id:
             return 'I couldn\'t find your service'
-        nodes = requests.get(BASEURL + 'service-monitor/nodes', params={'token': TOKEN})
-        statuses = requests.get(BASEURL + 'service-monitor/last/' + _id,
-                                params={'token': TOKEN})
+        nodes = requests.get(BASEURL + 'service-monitor/nodes', params={'token': self.token})
+        statuses = self.status.location(_id)
+
         all_results = []
-        for status in statuses.json():
+        for status in statuses:
 
             result = {
                 'title': self.real_name(status['location'], nodes.json()),
