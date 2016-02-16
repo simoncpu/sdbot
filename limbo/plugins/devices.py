@@ -14,7 +14,7 @@ from serverdensity.wrapper import Metrics
 from limbo.plugins.common.basewrapper import BaseWrapper
 
 COMMANDS = ['find', 'value', 'available']
-
+COLOR = '#A3B0CA'
 
 class Wrapper(BaseWrapper):
     def __init__(self):
@@ -43,7 +43,7 @@ class Wrapper(BaseWrapper):
         # list expression
         devices = [{
             'text': '*Device Name*: {}'.format(device['name']),
-            'color': '#A3B0CA',
+            'color': COLOR,
             'mrkdwn_in': ['text'],
             'fields': [{
                     'title': 'Group',
@@ -62,32 +62,12 @@ class Wrapper(BaseWrapper):
                 }
             ]
         } for device in results if device['name'] == name]
+        if len(devices) == 0:
+            devices = [{
+                'text': 'Sorry, I couldn\'t find a device with that name :('
+            }]
+
         return devices
-
-    def metric_filter(self, metrics, filter=None):
-        metrics = list(metrics)
-        if not filter:
-            filter = {}
-            filter[metrics.pop()] = 'all'
-            return self.metric_filter(metrics, filter)
-        else:
-            try:
-                metric = metrics.pop()
-                dic = {metric: filter}
-                return self.metric_filter(metrics, dic)
-            except IndexError:
-                return metrics, filter
-
-    def get_data(self, data, names=None):
-        if not names:
-            names = []
-        for d in data:
-            if d.get('data') or d.get('data') == []:
-                names.append(d.get('name'))
-                return d, names
-            else:
-                names.append(d.get('name'))
-                return self.get_data(d.get('tree'), names)
 
     def get_value(self, name, metrics):
         devices = self.device.list()
@@ -108,7 +88,7 @@ class Wrapper(BaseWrapper):
         result = {
             'title': 'Device name: {}'.format(name),
             'text': ' > '.join(names),
-            'color': '#F9F19A',
+            'color': COLOR,
             'fields': [
                 {
                     'title': 'Latest Value',
@@ -162,7 +142,7 @@ def on_message(msg, server):
     if isinstance(results, list):
         kwargs = {
             'attachments': json.dumps(results),
-            'text': 'This is the device I found for you'
+            'text': 'This is what I got for you'
         }
 
         server.slack.post_message(
