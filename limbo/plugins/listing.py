@@ -1,6 +1,6 @@
 """{
     "title": "list  <command>",
-    "text": "You can list things like `open alerts`, `devices` or `services`. For each command there are more options, to see them write `list <command> help`",
+    "text": "You can list things like `open alerts`, `devices` or `services`. For each command there are more options, to see them write `sdbot list <command> help`",
     "mrkdwn_in": ["text"],
     "color": "#FFF000"
 }"""
@@ -14,7 +14,7 @@ from serverdensity.wrapper import Alert
 
 from limbo.plugins.common.basewrapper import BaseWrapper
 
-COMMANDS = ['open alerts', 'services', 'devices']
+COMMANDS = ['open alerts', 'services', 'devices', 'help']
 COLOR = '#FFF000'
 
 
@@ -72,7 +72,7 @@ class Wrapper(BaseWrapper):
                 },
                 {
                     'title': 'Slow threshold',
-                    'value': service.get('slowThreshold') + 'ms',
+                    'value': str(service.get('slowThreshold')) + 'ms',
                     'short': True
                 }
             ]
@@ -138,8 +138,9 @@ class Wrapper(BaseWrapper):
 
     def extra_help(self, command):
         if command == 'open alerts':
-            helpfile = {
+            helpfile = [{
                 'title': 'Open Alerts',
+                'mrkdwn_in': ['text'],
                 'text': ('The full command for `open alerts` is `open alerts' +
                          ' <type> <name>` where `type` is either a `device`' +
                          ', `service` or `group`. `name` is the name of that ' +
@@ -148,23 +149,25 @@ class Wrapper(BaseWrapper):
                          'if you want all alerts write `list open alerts all` ' +
                          'instead.'),
                 'color': COLOR
-            }
+            }]
         elif command == 'devices':
-            helpfile = {
+            helpfile = [{
                 'title': 'Devices',
+                'mrkdwn_in': ['text'],
                 'text': ('The full command for `devices` is `devices <number>`' +
                          ', if a number is not specified I will give you 5 ' +
                          'devices by default'),
                 'color': COLOR
-            }
+            }]
         elif command == 'services':
-            helpfile = {
+            helpfile = [{
                 'title': 'Services',
-                'text': ('The full command for `services` is `services <number>`' +
-                         ', if a number is not specified I will give you 5 ' +
-                         'services by default'),
+                'mrkdwn_in': ['text'],
+                'text': ('The full command for listing services is ' +
+                         '`sdbot list services <number>`, if a number is not ' +
+                         'specified I will give you 5 services by default'),
                 'color': COLOR
-            }
+            }]
         return helpfile
 
     def list_alerts(self, command, typeof, name):
@@ -238,14 +241,18 @@ def on_message(msg, server):
     command, _, typeof, name = match[0]
 
     if command not in COMMANDS:
-        return 'I\'m sorry, but couldn\'t quite understand you there, perhaps you could try one of these commands `find`, `status`, `value` or `metrics`'
+
+        text = ('I\'m sorry, but couldn\'t quite understand you there, perhaps' +
+                ' you could try one of these commands `find`, `status`, `value` or `metrics`')
+        import pdb; pdb.set_trace()
+        return text
 
     api = Wrapper()
     results = api.results_of(command, typeof, name)
     if isinstance(results, list):
         kwargs = {
             'attachments': json.dumps(results),
-            'text': 'This is the {} I found for you'.format(command)
+            'text': 'This is what I got for you'
         }
 
         server.slack.post_message(

@@ -131,7 +131,7 @@ def on_message(msg, server):
 
     if command not in COMMANDS:
         text = ('I\'m sorry, but couldn\'t quite understand you there, perhaps' +
-                'you could try one of these commands `find`, `status`, `value`')
+                ' you could try one of these commands `find`, `status`, `value`')
 
         return text
 
