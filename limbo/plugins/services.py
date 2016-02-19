@@ -99,7 +99,7 @@ class Wrapper(BaseWrapper):
                 'fields': [
                     {
                         'title': 'Round Trip Time',
-                        'value': '{}s'.format(round(status['rtt'], 3)),
+                        'value': '{}s'.format(round(float(status['rtt']), 3)),
                         'short': True
                     },
                     {
@@ -109,7 +109,7 @@ class Wrapper(BaseWrapper):
                     },
                     {
                         'title': 'Response Time',
-                        'value': '{}s'.format(round(status['time'], 3)),
+                        'value': '{}s'.format(round(float(status['time']), 3)),
                         'short': True
                     },
                     {
