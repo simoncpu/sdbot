@@ -136,9 +136,6 @@ def handle_message(event, server):
 
     return "\n".join(run_hook(server.hooks, "message", event, server))
 
-def handle_hello(event, server):
-    import pdb; pdb.set_trace()
-    return "".join(run_hook(server.hooks, "hello", event, server))
 
 def handle_channel_joined(event, server):
     temp = "".join(run_hook(server.hooks, "channel_joined", event, server))
@@ -146,7 +143,7 @@ def handle_channel_joined(event, server):
 
 
 event_handlers = {
-    "message": handle_message,
+    'message': handle_message,
     'channel_joined': handle_channel_joined
 }
 

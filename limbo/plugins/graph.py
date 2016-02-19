@@ -153,15 +153,12 @@ class Wrapper(BaseWrapper):
 
         attachment = [
             {
-                'text': ('I brought you a graph for {} for the device {}'.format(' '.join(names), name) +
+                'text': ('I brought you a graph for {} for the device `{}`'.format(' '.join(names), name) +
                          '\nComing up in just a sec.'),
+                'mrkdwn_in': ['text']
             }
         ]
 
-        kwargs = {
-            'text': '',
-            'attachment': json.dumps(attachment)
-        }
         slack.chat.post_message(
             self.msg['channel'],
             '',
@@ -170,7 +167,6 @@ class Wrapper(BaseWrapper):
         )
 
         # uploads and sends the graph to channel
-
         file_response = slack.files.upload(
             filename,
             filename='{}.png'.format(name),
