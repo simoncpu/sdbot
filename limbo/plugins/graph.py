@@ -109,8 +109,7 @@ class Wrapper(BaseWrapper):
         y_ticks_values = np.array([point['y'] for point in device['data']])
         y_ticks = np.linspace(y_ticks_values.min(), y_ticks_values.max(), ticks)
         y_ticks = np.round(y_ticks, decimals=2)
-
-        plt.yticks(y_ticks, [str(val) + device.get('unit') for val in y_ticks])
+        plt.yticks(y_ticks, [str(val) + self.extract_unit(device) for val in y_ticks])
         # plt.ylim(ymin=0.1)  # Only show values of a certain threshold.
 
         plt.tight_layout()

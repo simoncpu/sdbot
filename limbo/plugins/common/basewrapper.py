@@ -42,6 +42,12 @@ class BaseWrapper(object):
                 names.append(d.get('name'))
                 return self.get_data(d.get('tree'), names)
 
+    def extract_units(self, device):
+        units = device.get('units', '')
+        if not units:
+            units = device.get('unit', '')
+        return units
+
     def online_status(self, lastpayload):
         if not lastpayload:
             return 'Unknown'

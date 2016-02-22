@@ -102,7 +102,7 @@ class Wrapper(BaseWrapper):
             'fields': [
                 {
                     'title': 'Latest Value',
-                    'value': '{}{}'.format(device['data'][-1]['y'], device.get('unit')),
+                    'value': '{}{}'.format(device['data'][-1]['y'], self.extract_unit(device)),
                     'short': True
                 }
             ]
