@@ -76,7 +76,8 @@ class Wrapper(BaseWrapper):
             }
             all_results.append(result)
 
-        return all_results
+        message = 'Here is the latest values for the {} locations of the service {}'.format(len(locations), name)
+        return all_results, message
 
     def real_name(self, _id, nodes):
         for node in nodes:
@@ -121,7 +122,8 @@ class Wrapper(BaseWrapper):
                 ]
             }
             all_results.append(result)
-        return all_results
+        message = 'This is the status of all your locations for the service {}'.format(name)
+        return all_results, message
 
 def on_message(msg, server):
     text = msg.get("text", "")
@@ -137,11 +139,11 @@ def on_message(msg, server):
         return text
 
     api = Wrapper(msg, server)
-    results = api.results_of(command, name, period)
+    results, message = api.results_of(command, name, period)
     if isinstance(results, list):
         kwargs = {
             'attachments': json.dumps(results),
-            'text': 'This is the {} I found for you'.format(command)
+            'text': message
         }
 
         server.slack.post_message(
