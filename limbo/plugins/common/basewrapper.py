@@ -42,7 +42,7 @@ class BaseWrapper(object):
                 names.append(d.get('name'))
                 return self.get_data(d.get('tree'), names)
 
-    def extract_units(self, device):
+    def extract_unit(self, device):
         units = device.get('units', '')
         if not units:
             units = device.get('unit', '')
