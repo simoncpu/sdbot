@@ -16,13 +16,13 @@ from datetime import datetime
 from serverdensity.wrapper import Metrics
 from serverdensity.wrapper import Device
 
-from matplotlib.ticker import MultipleLocator
 from matplotlib.dates import AutoDateLocator
 from matplotlib.dates import AutoDateFormatter
 from matplotlib import pyplot as plt
 import numpy as np
 
 from slacker import Slacker
+import parsedatetime
 
 from limbo.plugins.common.basewrapper import BaseWrapper
 
@@ -134,13 +134,22 @@ class Wrapper(BaseWrapper):
         metrics_names = metrics.split('.')
         _, filter = self.metric_filter(metrics_names)
 
-        now = datetime.now()
-        past = now - timedelta(minutes=240)
+        cal = parsedatetime.Calendar()
+        if not period:
+            period = '2 hours ago'
+        past, _ = cal.parseDT(datetimeString=period, tzinfo=self.timezone)
+        now = datetime.now(self.timezone)
+
+        if past > now:
+            return 'Hey, I can\'t predict your data into the future, your date has to be in the past and now your date is {}'.format(past)
 
         metrics_data = self.metrics.get(_id, past, now, filter)
         device, names = self.get_data(metrics_data)
         if not device.get('data'):
-            return 'Could not find any data for these metrics'
+            text = ('It might be that your device is offline or has no metrics for `{}`.'.format(metrics) +
+                    'You can see what metrics is available by using `sdbot devices available {}`'.format(name))
+            return text
+
         # creates file
         slack = Slacker(os.environ.get('SLACK_TOKEN'))
         slack.chat.post_message(
@@ -154,7 +163,7 @@ class Wrapper(BaseWrapper):
         attachment = [
             {
                 'text': ('I brought you a graph for {} for the device `{}`'.format(' '.join(names), name) +
-                         '\nComing up in just a sec.'),
+                         '\n A graph is coming up in just a sec.'),
                 'mrkdwn_in': ['text'],
                 'color': COLOR
             }
@@ -180,10 +189,11 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"sdbot graph ((\.?[A-Za-z.\s()]+){1,3} for)\s?(\b\w+\b)\s?(.*)", text)
+    match = re.findall(r"sdbot graph ((\.?[A-Za-z.\s()]+){1,3} for)\s?(.*)\s?from\s?(.*)", text)
     if not match:
         return
     _, metrics, name, period = match[0]
+    name = name.strip()
 
     api = Wrapper(msg, server)
     results = api.results_of(metrics, name, period)
