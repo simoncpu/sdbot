@@ -14,8 +14,9 @@ logger = logging.getLogger(__name__)
 def on_message(msg, server):
     text = msg.get("text", "")
     logger.debug(text)
-    match = re.findall(r"^sdbot\s?(help)?( .*)?", text)
-
+    match = re.findall(r"^sdbot help ( .*)?", text)
+    if not match:
+        match = re.findall(r'^sdbot\s?$', text)
     if not match:
         return
 

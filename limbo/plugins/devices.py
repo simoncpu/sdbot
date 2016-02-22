@@ -139,11 +139,12 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"sdbot devices (\b\w+\b)\s?((\.?[A-Za-z.\s()]+){1,3} for)?\s?(\b\w+\b)?", text)
+    match = re.findall(r"^sdbot devices (\b\w+\b)\s?((\.?[A-Za-z.\s()]+){1,3} for)?\s?(.*)?", text)
     if not match:
         return
 
     command, unclean_metrics, _, name = match[0]
+    name = name.strip()
     metrics = unclean_metrics.split('for')[0].strip()
     if command not in COMMANDS:
         text = ('I\'m sorry, but couldn\'t quite understand you there, perhaps' +
