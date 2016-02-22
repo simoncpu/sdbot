@@ -121,7 +121,8 @@ class Wrapper(BaseWrapper):
     def get_available(self, name):
         devices = self.device.list()
         _id = self.find_id(name, [], devices)
-
+        if not _id:
+            return 'It looks like there is no device named {}'.format(name)
         now = datetime.now()
         past30 = now - timedelta(minutes=120)
 

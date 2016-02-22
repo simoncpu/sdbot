@@ -105,7 +105,7 @@ class Wrapper(BaseWrapper):
             ]
         } for service in tcp]
         if not number:
-            message = 'Here are 5 services, you want to see more than that you can, just do `sdbot list services <number>`'
+            message = 'Here are 5 services, if you want to see more than that you can, just do `sdbot list services <number>`'
         else:
             message = 'Here are all your {} services'.format(len(slack_tcp + slack_http))
         return slack_tcp + slack_http, message
@@ -144,7 +144,7 @@ class Wrapper(BaseWrapper):
             ]
         } for device in devices]
         if not number:
-            message = 'Here are 5 services, you want to see more than that you can, just do `sdbot list devices <number>`'
+            message = 'Here are 5 devices, if you want to see more than that you can, just do `sdbot list devices <number>`'
         else:
             message = 'Here are your devices'
         return slack_formatting, message

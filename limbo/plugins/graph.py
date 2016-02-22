@@ -146,7 +146,7 @@ class Wrapper(BaseWrapper):
         device, names = self.get_data(metrics_data)
         if not device.get('data'):
             text = ('It might be that your device is offline or has no metrics for `{}`.'.format(metrics) +
-                    'You can see what metrics is available by using `sdbot devices available {}`'.format(name))
+                    'You can see what metrics are available by using `sdbot devices available {}`'.format(name))
             return text
 
         # creates file
