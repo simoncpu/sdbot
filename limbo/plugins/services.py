@@ -125,6 +125,7 @@ class Wrapper(BaseWrapper):
         message = 'This is the status of all your locations for the service {}'.format(name)
         return all_results, message
 
+
 def on_message(msg, server):
     text = msg.get("text", "")
     match = re.findall(r"sdbot services (\b\w+\b)\s?(\b\w+\b)?\s?(\b\w+\b)?", text)

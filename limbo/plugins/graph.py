@@ -188,10 +188,16 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"sdbot graph ((\.?[A-Za-z.\s()]+){1,3} for)\s?(.*)\s?from\s?(.*)", text)
+    match = re.findall(r"sdbot graph ((\.?[A-Za-z.\s()]+){1,3} for)\s?(.*)", text)
     if not match:
         return
-    _, metrics, name, period = match[0]
+    _, metrics, name_period = match[0]
+    name_period = name_period.split('from')
+    if len(name_period) < 2:
+        name = name_period[0]
+        period = ''
+    else:
+        name, period = name_period
     name = name.strip()
 
     api = Wrapper(msg, server)
