@@ -1,6 +1,6 @@
 """{
     "title": "graph <metrics> for <name>",
-    "text": "Here you can graph any of the available metrics for a device. `metrics` need to be separated by spaces like this `cpuStats CPUs usr` and the expression is case sensitive.",
+    "text": "Here you can graph any of the available metrics for a device. `metrics` need to be separated by dots like this `cpuStats.CPUs.usr` and the expression is case sensitive. The metrics you can use for the particular device you can find by doing `sdbot devices available deviceName`",
     "mrkdwn_in": ["text"],
     "color": "#E8A824"
 }"""
@@ -155,7 +155,8 @@ class Wrapper(BaseWrapper):
             {
                 'text': ('I brought you a graph for {} for the device `{}`'.format(' '.join(names), name) +
                          '\nComing up in just a sec.'),
-                'mrkdwn_in': ['text']
+                'mrkdwn_in': ['text'],
+                'color': COLOR
             }
         ]
 
@@ -179,10 +180,10 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"sdbot graph ((\s?\w+){1,3} for)?\s?(\b\w+\b)\s?(.*)", text)
+    match = re.findall(r"sdbot graph ((\.?[A-Za-z.\s()]+){1,3} for)\s?(\b\w+\b)\s?(.*)", text)
     if not match:
         return
-    metrics, _, name, period = match[0]
+    _, metrics, name, period = match[0]
 
     api = Wrapper(msg, server)
     results = api.results_of(metrics, name, period)
