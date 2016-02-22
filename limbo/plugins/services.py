@@ -54,9 +54,12 @@ class Wrapper(BaseWrapper):
             metrics = self.metrics.get(_id, past30, now, filtered)
             service = metrics[0]['tree'][0]
             data = service['data']
-
-            latest = '{}s'.format(round(data[-1]['y'], 3))
-            avg = '{}s'.format(round(sum([point['y'] for point in data])/len(data), 3))
+            try:
+                latest = '{}s'.format(round(data[-1]['y'], 3))
+                avg = '{}s'.format(round(sum([point['y'] for point in data])/len(data), 3))
+            except IndexError:
+                latest = 'down'
+                avg = 'down'
 
             result = {
                 'title': service['name'],
@@ -101,7 +104,7 @@ class Wrapper(BaseWrapper):
                 'fields': [
                     {
                         'title': 'Round Trip Time',
-                        'value': '{}s'.format(round(float(status['rtt']), 3)),
+                        'value': '{}s'.format(round(float(status.get('rtt', 0)), 3)),
                         'short': True
                     },
                     {
@@ -111,7 +114,7 @@ class Wrapper(BaseWrapper):
                     },
                     {
                         'title': 'Response Time',
-                        'value': '{}s'.format(round(float(status['time']), 3)),
+                        'value': '{}s'.format(round(float(status.get('time', 0)), 3)),
                         'short': True
                     },
                     {
