@@ -14,6 +14,9 @@ clean:
 run: install
 	bin/limbo
 
+.PHONY: prod_run
+run: bin/limbo
+
 .PHONY: repl
 repl: install
 	bin/limbo -t

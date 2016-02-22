@@ -4,6 +4,7 @@
 
 import os
 import sys
+from setuptools import find_packages
 
 try:
     from setuptools import setup
@@ -18,8 +19,6 @@ required = ['requests>=2.5', 'websocket-client==0.32.0',
 if not PYTHON3:
     required += ['importlib>=1.0.3']
 
-packages = ['limbo', 'limbo.plugins', 'limbo.plugins.common']
-
 try:
     longdesc = open("README.rs").read()
 except:
@@ -33,9 +32,9 @@ setup(
     author='Bill Mill',
     author_email='bill@billmill.org',
     url='https://github.com/llimllib/limbo',
-    packages=packages,
-    scripts = ['bin/limbo'],
-    package_data={'': ['LICENSE',], '': ['limbo/plugins/*.py']},
+    packages=find_packages(),
+    scripts=['bin/limbo'],
+    package_data={'': ['LICENSE'], '': ['limbo/plugins/*.py']},
     include_package_data=True,
     install_requires=required,
     license='MIT',
