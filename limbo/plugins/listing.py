@@ -2,7 +2,7 @@
     "title": "list  <command>",
     "text": "You can list things like `open alerts`, `devices` or `services`. For each command there are more options, to see them write `sdbot list <command> help`",
     "mrkdwn_in": ["text"],
-    "color": "#FFF000"
+    "color": "#3EB891"
 }"""
 import re
 import time
@@ -15,7 +15,7 @@ from serverdensity.wrapper import Alert
 from limbo.plugins.common.basewrapper import BaseWrapper
 
 COMMANDS = ['open alerts', 'services', 'devices', 'help']
-COLOR = '#FFF000'
+COLOR = '#3EB891'
 
 
 class Wrapper(BaseWrapper):

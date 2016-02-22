@@ -2,7 +2,7 @@
     "title": "services <command> <name> (<period>)",
     "text": "You can get more info about your services through commands such as `status` or `value`",
     "mrkdwn_in": ["text"],
-    "color": "#F9F19A"
+    "color": "#8E44AD"
 }"""
 
 import json
@@ -19,6 +19,7 @@ from limbo.plugins.common.basewrapper import BaseWrapper
 
 COMMANDS = ['status', 'value']
 BASEURL = 'https://api.serverdensity.io/'
+COLOR = '#8E44AD'
 
 
 class Wrapper(BaseWrapper):
@@ -59,7 +60,7 @@ class Wrapper(BaseWrapper):
 
             result = {
                 'title': service['name'],
-                'color': '#F9F19A',
+                'color': COLOR,
                 'fields': [
                     {
                         'title': '30 Minute Average',
@@ -95,7 +96,7 @@ class Wrapper(BaseWrapper):
 
             result = {
                 'title': self.real_name(status['location'], nodes.json()),
-                'color': '#F9F19A',
+                'color': COLOR,
                 'fields': [
                     {
                         'title': 'Round Trip Time',

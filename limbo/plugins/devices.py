@@ -2,7 +2,7 @@
     "title": "devices <command> (<metrics> for) <name>",
     "text": "You can get more info about your services through commands such as `find`, `value`, `available`",
     "mrkdwn_in": ["text"],
-    "color": "#A3B0CA"
+    "color": "#E83880"
 }"""
 import re
 import json
@@ -14,7 +14,7 @@ from serverdensity.wrapper import Metrics
 from limbo.plugins.common.basewrapper import BaseWrapper
 
 COMMANDS = ['find', 'value', 'available']
-COLOR = '#A3B0CA'
+COLOR = '#E83880'
 
 class Wrapper(BaseWrapper):
     def __init__(self):

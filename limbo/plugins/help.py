@@ -2,7 +2,7 @@
     "title": "help",
     "text": "We'll give you all the help you need!",
     "mrkdwn_in": ["text"],
-    "color": "#FFF000"
+    "color": "#71CADC"
 }"""
 
 import re

@@ -2,7 +2,7 @@
     "title": "graph <metrics> for <name>",
     "text": "Here you can graph any of the available metrics for a device. `metrics` need to be separated by spaces like this `cpuStats CPUs usr` and the expression is case sensitive.",
     "mrkdwn_in": ["text"],
-    "color": "#4E82C5"
+    "color": "#E8A824"
 }"""
 
 import os
@@ -26,7 +26,7 @@ from slacker import Slacker
 
 from limbo.plugins.common.basewrapper import BaseWrapper
 
-COLOR = "#4E82C5"
+COLOR = "#E8A824"
 COMMANDS = ['graph']
 
 
