@@ -14,12 +14,12 @@ logger = logging.getLogger(__name__)
 def on_message(msg, server):
     text = msg.get("text", "")
     logger.debug(text)
-    match = re.findall(r"^sdbot help( .*)?", text)
+    match = re.findall(r"^sdbot\s?(help)?( .*)?", text)
 
     if not match:
         return
 
-    helptopic = match[0].strip()
+    helptopic = match[0][1].strip()
     if helptopic:
         return server.hooks["extendedhelp"].get(helptopic,
                 "No help found for {0}".format(helptopic))
