@@ -1,4 +1,5 @@
 import os
+import time
 
 from pytz import timezone
 
@@ -40,6 +41,15 @@ class BaseWrapper(object):
             else:
                 names.append(d.get('name'))
                 return self.get_data(d.get('tree'), names)
+
+    def online_status(self, lastpayload):
+        if not lastpayload:
+            return 'Unknown'
+        diff = time.time() - lastpayload['sec']
+        if diff < 180:
+            return 'Online'
+        else:
+            return 'Last online {} minutes ago'.format(diff/60)
 
     def metric_filter(self, metrics, filter=None):
         """from a list of metrics ie ['cpuStats', 'CPUs', 'usr'] it constructs

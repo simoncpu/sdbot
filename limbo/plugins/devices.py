@@ -59,6 +59,11 @@ class Wrapper(BaseWrapper):
                     'title': 'Id',
                     'value': device.get('_id'),
                     'short': True
+                },
+                {
+                    'title': 'Online Status',
+                    'value': self.online_status(device.get('lastPayloadAt', '')),
+                    'short': True
                 }
             ]
         } for device in results if device['name'] == name]
