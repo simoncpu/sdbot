@@ -39,4 +39,4 @@ def on_message(msg, server):
             **kwargs)
 
 def on_channel_joined(msg, server):
-    return "Thanks for inviting me to the channel"
+    return "Thanks for inviting me to the channel. See what I can do for you by writing `sdbot help`"

@@ -1,5 +1,5 @@
 """{
-    "title": "graph <metrics> for <name>",
+    "title": "graph <metrics> for <name> from <period>",
     "text": "Here you can graph any of the available metrics for a device. `metrics` need to be separated by dots like this `cpuStats.CPUs.usr` and the expression is case sensitive. The metrics you can use for the particular device you can find by doing `sdbot devices available deviceName`",
     "mrkdwn_in": ["text"],
     "color": "#E8A824"
@@ -44,7 +44,7 @@ class Wrapper(BaseWrapper):
 
     def create_graph(self, device):
 
-        # 400 and 200 pixels.
+        # 800 and 355 pixels.
         ticks = 4
         width = 8
         height = 3.55

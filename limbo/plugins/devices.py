@@ -125,7 +125,10 @@ class Wrapper(BaseWrapper):
         text = ''
         for a in available:
             text += '.'.join(a) + '\n'
-        text = 'Here are the metrics you can use\n' + '```' + text + '```'
+        if text:
+            text = 'Here are the metrics you can use\n' + '```' + text + '```'
+        else:
+            text = 'Your device seems to be offline, it doesn\'t contain any metrics in the last 2 hours'
         return text
 
 def on_message(msg, server):
