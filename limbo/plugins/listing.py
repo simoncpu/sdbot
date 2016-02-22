@@ -244,7 +244,6 @@ def on_message(msg, server):
 
         text = ('I\'m sorry, but couldn\'t quite understand you there, perhaps' +
                 ' you could try one of these commands `find`, `status`, `value` or `metrics`')
-        import pdb; pdb.set_trace()
         return text
 
     api = Wrapper()

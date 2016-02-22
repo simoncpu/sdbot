@@ -89,6 +89,7 @@ class Wrapper(BaseWrapper):
 
         if not device.get('data'):
             return 'Could not find any data for these metrics'
+
         result = {
             'title': 'Device name: {}'.format(name),
             'text': ' > '.join(names),
@@ -96,7 +97,7 @@ class Wrapper(BaseWrapper):
             'fields': [
                 {
                     'title': 'Latest Value',
-                    'value': '{}{}'.format(device['data'][-1]['y'], device.get('units', '')),
+                    'value': '{}{}'.format(device['data'][-1]['y'], device.get('unit')),
                     'short': True
                 }
             ]
@@ -129,7 +130,7 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"sdbot devices (\b\w+\b)\s?((\.?\w+){1,3} for)?\s?(\b\w+\b)?", text)
+    match = re.findall(r"sdbot devices (\b\w+\b)\s?((\.?[A-Za-z.\s()]+){1,3} for)?\s?(\b\w+\b)?", text)
     if not match:
         return
 
