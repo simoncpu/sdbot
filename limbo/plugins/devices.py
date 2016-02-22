@@ -1,5 +1,5 @@
 """{
-    "title": "devices <command> (<metrics> for) <name>",
+    "title": "devices <command> <name>",
     "text": "You can get more info about your services through commands such as `find`, `value`, `available`",
     "mrkdwn_in": ["text"],
     "color": "#E83880"
@@ -75,7 +75,10 @@ class Wrapper(BaseWrapper):
         if not _id:
             return 'I couldn\'t find your device'
 
-        metrics = metrics.split(' ')
+        if not metrics:
+            return ('You have not included any metrics the right way to do it ' +
+                    'is give metrics this way `sdbot devices memory.memSwapFree for macbook`')
+        metrics = metrics.split('.')
         _, filter = self.metric_filter(metrics)
 
         now = datetime.now()
@@ -83,6 +86,7 @@ class Wrapper(BaseWrapper):
 
         metrics = self.metrics.get(_id, past30, now, filter)
         device, names = self.get_data(metrics)
+
         if not device.get('data'):
             return 'Could not find any data for these metrics'
         result = {
@@ -119,13 +123,13 @@ class Wrapper(BaseWrapper):
         available = list(self.flatten(metrics))
         text = ''
         for a in available:
-            text += ' > '.join(a) + '\n'
+            text += '.'.join(a) + '\n'
         text = 'Here are the metrics you can use\n' + '```' + text + '```'
         return text
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"sdbot devices (\b\w+\b)\s?((\s?\w+){1,3} for)?\s?(\b\w+\b)?", text)
+    match = re.findall(r"sdbot devices (\b\w+\b)\s?((\.?\w+){1,3} for)?\s?(\b\w+\b)?", text)
     if not match:
         return
 

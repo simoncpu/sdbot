@@ -131,7 +131,7 @@ class Wrapper(BaseWrapper):
         if not _id:
             return 'I couldn\'t find your device.'
 
-        metrics_names = metrics.split(' ')
+        metrics_names = metrics.split('.')
         _, filter = self.metric_filter(metrics_names)
 
         now = datetime.now()

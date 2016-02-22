@@ -1,5 +1,5 @@
 """{
-    "title": "services <command> <name> (<period>)",
+    "title": "services <command> <name>",
     "text": "You can get more info about your services through commands such as `status` or `value`",
     "mrkdwn_in": ["text"],
     "color": "#8E44AD"
