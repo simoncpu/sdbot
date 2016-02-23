@@ -31,17 +31,8 @@ class Wrapper(BaseWrapper):
             result = self.get_available(name)
         return result
 
-    def find_device(self, name):
-        results = self.device.list()
-
-        if not name:
-            msg = 'Here are all the devices that I found'
-            device_list = "\n".join([device['name'] for device in results])
-            result = msg + '\n```' + device_list + '```'
-            return result
-
-        # list expression
-        devices = [{
+    def _format_devices(self, devices):
+        formatted = [{
             'text': '*Device Name*: {}'.format(device['name']),
             'color': COLOR,
             'mrkdwn_in': ['text'],
@@ -66,14 +57,29 @@ class Wrapper(BaseWrapper):
                     'short': True
                 }
             ]
-        } for device in results if re.search(name, device['name'])]
-        if len(devices) == 0:
-            devices = [{
+        } for device in devices]
+        return formatted
+
+    def find_device(self, name):
+        devices = self.device.list()
+
+        if not name:
+            msg = 'Here are all the devices that I found'
+            device_list = "\n".join([device['name'] for device in devices])
+            result = msg + '\n```' + device_list + '```'
+            return result
+
+        devices = [device for device in devices if re.search(name, device['name'])]
+        formatted_devices = self._format_devices(devices)
+        # list expression
+
+        if len(formatted_devices) == 0:
+            formatted_devices = [{
                 'text': 'Sorry, I couldn\'t find a device with that name :(',
                 'color': COLOR
             }]
 
-        return devices
+        return formatted_devices
 
     def get_value(self, name, metrics):
         devices = self.device.list()
