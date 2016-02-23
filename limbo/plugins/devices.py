@@ -66,10 +66,11 @@ class Wrapper(BaseWrapper):
                     'short': True
                 }
             ]
-        } for device in results if device['name'] == name]
+        } for device in results if re.search(name, device['name'])]
         if len(devices) == 0:
             devices = [{
-                'text': 'Sorry, I couldn\'t find a device with that name :('
+                'text': 'Sorry, I couldn\'t find a device with that name :(',
+                'color': COLOR
             }]
 
         return devices

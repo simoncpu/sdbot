@@ -1,6 +1,6 @@
 """{
     "title": "services <command> <name>",
-    "text": "You can get more info about your services through commands such as `status` or `value`",
+    "text": "You can get more info about your services through commands such as `status`, `value` or `find`",
     "mrkdwn_in": ["text"],
     "color": "#8E44AD"
 }"""
@@ -17,7 +17,7 @@ from serverdensity.wrapper import Metrics
 from serverdensity.wrapper import ServiceStatus
 from limbo.plugins.common.basewrapper import BaseWrapper
 
-COMMANDS = ['status', 'value']
+COMMANDS = ['status', 'value', 'find']
 BASEURL = 'https://api.serverdensity.io/'
 COLOR = '#8E44AD'
 
@@ -36,7 +36,87 @@ class Wrapper(BaseWrapper):
             result = self.get_value(name)
         elif command == 'status':
             result = self.get_status(name)
+        elif command == 'find':
+            result = self.find_service(name)
         return result
+
+    def _service_formatting(self, http, tcp):
+        slack_http = [{
+            'text': '*Service Name*: {}'.format(service['name']),
+            'color': COLOR,
+            'mrkdwn_in': ['text'],
+            'fields': [{
+                    'title': 'Group',
+                    'value': service.get('group') if service.get('group') else 'Ungrouped',
+                    'short': True
+                },
+                {
+                    'title': 'Type of check',
+                    'value': service.get('checkType'),
+                    'short': True
+                },
+                {
+                    'title': 'Url',
+                    'value': service.get('checkUrl'),
+                    'short': True
+                },
+                {
+                    'title': 'Method',
+                    'value': service.get('checkMethod'),
+                    'short': True
+                },
+                {
+                    'title': 'Slow threshold',
+                    'value': str(service.get('slowThreshold')) + 'ms',
+                    'short': True
+                }
+            ]
+        } for service in http]
+
+        slack_tcp = [{
+            'text': '*Service Name*: {}'.format(service['name']),
+            'color': COLOR,
+            'mrkdwn_in': ['text'],
+            'fields': [{
+                    'title': 'Group',
+                    'value': service.get('group') if service.get('group') else 'Ungrouped',
+                    'short': True
+                },
+                {
+                    'title': 'Type of check',
+                    'value': service.get('checkType'),
+                    'short': True
+                },
+                {
+                    'title': 'Host',
+                    'value': service.get('host'),
+                    'short': True
+                },
+                {
+                    'title': 'Port',
+                    'value': service.get('port'),
+                    'short': True
+                }
+            ]
+        } for service in tcp]
+
+        return slack_http + slack_tcp
+
+    def find_service(self, name):
+        # if number:
+        #     try:
+        #         number = number.strip()
+        #         number = int(number)
+        #     except ValueError:
+        #         return '{} is not a number, now is it. You see it needs to be.'.format(number)
+
+        services = self.service.list()
+        http = [s for s in services if s['checkType'] == 'http' and
+                re.search(name, s['name'])]
+        tcp = [s for s in services if s['checkType'] == 'tcp' and
+               re.search(name, s['name'])]
+
+        return self._service_formatting(http, tcp), ''
 
     def get_value(self, name):
         services = self.service.list()
