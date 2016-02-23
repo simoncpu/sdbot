@@ -1,6 +1,6 @@
 """{
     "title": "services <command> <name>",
-    "text": "You can get more info about your services through commands such as `status`, `value` or `find`",
+    "text": "You can get more info about your services through commands such as `status`, `value`, `find` or `list`",
     "mrkdwn_in": ["text"],
     "color": "#8E44AD"
 }"""
@@ -17,7 +17,7 @@ from serverdensity.wrapper import Metrics
 from serverdensity.wrapper import ServiceStatus
 from limbo.plugins.common.basewrapper import BaseWrapper
 
-COMMANDS = ['status', 'value', 'find']
+COMMANDS = ['status', 'value', 'find', 'list']
 BASEURL = 'https://api.serverdensity.io/'
 COLOR = '#8E44AD'
 
@@ -38,6 +38,8 @@ class Wrapper(BaseWrapper):
             result = self.get_status(name)
         elif command == 'find':
             result = self.find_service(name)
+        elif command == 'list':
+            result = self.list_service(name)
         return result
 
     def _service_formatting(self, http, tcp):
@@ -102,13 +104,31 @@ class Wrapper(BaseWrapper):
 
         return slack_http + slack_tcp
 
+    def list_service(self, number):
+        if number:
+            try:
+                number = number.strip()
+                number = int(number)
+            except ValueError:
+                text = '{} is not a number, now is it. You see, it needs to be.'.format(number)
+                return text, ''
+
+        services = self.service.list()
+        if number:
+            services_trunc = services[:number]
+        else:
+            services_trunc = services[:5]
+
+        http = [s for s in services_trunc if s['checkType'] == 'http']
+        tcp = [s for s in services_trunc if s['checkType'] == 'tcp']
+
+        formatted = self._service_formatting(http, tcp)
+        message = ('You have {} services, if you would like to'.format(len(services)) +
+                   ' list more than these {} services, use '.format(len(services_trunc)) +
+                   '`sdbot services list <no>`')
+        return formatted, message
+
     def find_service(self, name):
-        # if number:
-        #     try:
-        #         number = number.strip()
-        #         number = int(number)
-        #     except ValueError:
-        #         return '{} is not a number, now is it. You see it needs to be.'.format(number)
 
         services = self.service.list()
         http = [s for s in services if s['checkType'] == 'http' and
@@ -122,7 +142,7 @@ class Wrapper(BaseWrapper):
         services = self.service.list()
         _id = self.find_id(name, services, [])
         if not _id:
-            return 'I couldn\'t find your service'
+            return 'I couldn\'t find your service', ''
         service = self.service.view(_id)
         locations = service['checkLocations']
         all_results = []
@@ -171,7 +191,7 @@ class Wrapper(BaseWrapper):
         services = self.service.list()
         _id = self.find_id(name, services, [])
         if not _id:
-            return 'I couldn\'t find your service'
+            return 'I couldn\'t find your service', ''
         nodes = requests.get(BASEURL + 'service-monitor/nodes', params={'token': self.token})
         statuses = self.status.location(_id)
 
@@ -216,7 +236,7 @@ def on_message(msg, server):
         return
     command, name = match[0]
     name = name.strip()
-    if not name:
+    if not name and command != 'list':
         text = ('It looks like you forgot to add a name, ' +
                 'try `sdbot services {} serviceName`'.format(command))
         return text
