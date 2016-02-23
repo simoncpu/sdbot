@@ -1,6 +1,6 @@
 """{
     "title": "devices <command> <name>",
-    "text": "You can get more info about your services through commands such as `find`, `value`, `available`",
+    "text": "You can get more info about your services through commands such as `find`, `value`, `available` or `list`. Get more help about each command by using help: `sdbot devices help`",
     "mrkdwn_in": ["text"],
     "color": "#E83880"
 }"""
@@ -13,7 +13,7 @@ from serverdensity.wrapper import Metrics
 
 from limbo.plugins.common.basewrapper import BaseWrapper
 
-COMMANDS = ['find', 'value', 'available', 'list']
+COMMANDS = ['find', 'value', 'available', 'list', 'help']
 COLOR = '#E83880'
 
 class Wrapper(BaseWrapper):
@@ -32,6 +32,57 @@ class Wrapper(BaseWrapper):
         elif command == 'list':
             result = self.list_devices(name)
         return result
+
+    def extra_help(self, command):
+        help_command = {
+            'value': {
+                'title': 'Latest Value for a Device',
+                'mrkdwn_in': ['text'],
+                'text': ('Overall Status gives you statistics about your services. ' +
+                         'It includes _Round trip time_, _Response Time_, ' +
+                         '_Status Code_ and _Status of location_. To get ' +
+                         'the status of a service you simply do `sdbot services status serviceName`'),
+                'color': COLOR
+            },
+            'find': {
+                'title': 'Finding a Device',
+                'mrkdwn_in': ['text'],
+                'text': ('With this command you can find a service with the command ' +
+                         '`sdbot services find serviceName`. The service name in ' +
+                         'this case may be using regex to find the services you are after'),
+                'color': COLOR
+            },
+            'list': {
+                'title': 'Listing Devices',
+                'mrkdwn_in': ['text'],
+                'text': ('To get an overview of the services you have you can ' +
+                         'list them with `sdbot services list <no>`. `<no>` ' +
+                         'is in this case a number. If you leave it out I will ' +
+                         'list the first 5 services.'),
+                'color': COLOR
+            },
+            'available': {
+                'title': 'Available Metrics',
+                'mrkdwn_in': ['text'],
+                'text': ('To get an overview of the services you have you can ' +
+                         'list them with `sdbot services list <no>`. `<no>` ' +
+                         'is in this case a number. If you leave it out I will ' +
+                         'list the first 5 services.'),
+                'color': COLOR
+            }
+        }
+
+        if command == 'value':
+            helptext = [help_command['value']]
+        elif command == 'available':
+            helptext = [help_command['available']]
+        elif command == 'find':
+            helptext = [help_command['find']]
+        elif command == 'list':
+            helptext = [help_command['list']]
+        elif command == 'help':
+            helptext = [attachment for attachment in help_command.values()]
+        return helptext
 
     def _format_devices(self, devices):
         formatted = [{
@@ -106,7 +157,7 @@ class Wrapper(BaseWrapper):
 
         if not metrics:
             return ('You have not included any metrics the right way to do it ' +
-                    'is give metrics this way `sdbot devices memory.memSwapFree for macbook`')
+                    'is give metrics this way `sdbot devices value memory.memSwapFree for {}`'.format(name))
         metrics = metrics.split('.')
         _, filter = self.metric_filter(metrics)
 
@@ -147,7 +198,7 @@ class Wrapper(BaseWrapper):
         _id = self.find_id(name, [], devices)
 
         if not _id:
-            return 'It looks like there is no device named {}'.format(name)
+            return 'It looks like there is no device named `{}`'.format(name)
         now = datetime.now()
         past30 = now - timedelta(minutes=120)
 
