@@ -13,7 +13,7 @@ from serverdensity.wrapper import Metrics
 
 from limbo.plugins.common.basewrapper import BaseWrapper
 
-COMMANDS = ['find', 'value', 'available']
+COMMANDS = ['find', 'value', 'available', 'list']
 COLOR = '#E83880'
 
 class Wrapper(BaseWrapper):
@@ -29,6 +29,8 @@ class Wrapper(BaseWrapper):
             result = self.get_value(name, metrics)
         elif command == 'available':
             result = self.get_available(name)
+        elif command == 'list':
+            result = self.list_devices(name)
         return result
 
     def _format_devices(self, devices):
@@ -60,6 +62,22 @@ class Wrapper(BaseWrapper):
         } for device in devices]
         return formatted
 
+    def list_devices(self, number):
+        if number:
+            try:
+                number = number.strip()
+                number = int(number)
+            except ValueError:
+                text = '{} is not a number, now is it. You see, it needs to be.'.format(number)
+                return text
+        devices = self.device.list()
+        if number:
+            devices_trunc = devices[:number]
+        else:
+            devices_trunc = devices[:5]
+
+        return self._format_devices(devices_trunc)
+
     def find_device(self, name):
         devices = self.device.list()
 
@@ -71,7 +89,6 @@ class Wrapper(BaseWrapper):
 
         devices = [device for device in devices if re.search(name, device['name'])]
         formatted_devices = self._format_devices(devices)
-        # list expression
 
         if len(formatted_devices) == 0:
             formatted_devices = [{
@@ -153,7 +170,7 @@ def on_message(msg, server):
 
     command, unclean_metrics, _, name = match[0]
     name = name.strip()
-    if not name:
+    if not name and command not in ['list', 'help']:
         text = ('It looks like you forgot to add a name, ' +
                 'try `sdbot devices {} {} deviceName`'.format(command, unclean_metrics))
         return text
