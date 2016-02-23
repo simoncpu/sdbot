@@ -103,7 +103,7 @@ class Wrapper(BaseWrapper):
         # setting dates in x-axis automatically triggers use of AutoDateLocator
         x = [datetime.fromtimestamp(point['x']) for point in device['data']]
         y = [point['y'] for point in device['data']]
-        plt.plot(x, y, color='#e4794e', linewidth=2)
+        plt.plot(x, y, color='#53b4d4', linewidth=2)
 
         # pick values for y-axis
         y_ticks_values = np.array([point['y'] for point in device['data']])
