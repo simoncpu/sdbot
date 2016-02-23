@@ -1,6 +1,6 @@
 """{
     "title": "services <command> <name>",
-    "text": "You can get more info about your services through commands such as `status`, `value`, `find` or `list`",
+    "text": "You can get more info about your services through commands such as `status`, `find` or `list`. Get more help about the commands by using help: `sdbot services help`",
     "mrkdwn_in": ["text"],
     "color": "#8E44AD"
 }"""
@@ -17,7 +17,7 @@ from serverdensity.wrapper import Metrics
 from serverdensity.wrapper import ServiceStatus
 from limbo.plugins.common.basewrapper import BaseWrapper
 
-COMMANDS = ['status', 'value', 'find', 'list']
+COMMANDS = ['status', 'find', 'list', 'help']
 BASEURL = 'https://api.serverdensity.io/'
 COLOR = '#8E44AD'
 
@@ -32,7 +32,9 @@ class Wrapper(BaseWrapper):
         self.msg = msg
 
     def results_of(self, command, name):
-        if command == 'value':
+        if command == 'help' or name == 'help':
+            result = self.extra_help(command)
+        elif command == 'value':
             result = self.get_value(name)
         elif command == 'status':
             result = self.get_status(name)
@@ -41,6 +43,46 @@ class Wrapper(BaseWrapper):
         elif command == 'list':
             result = self.list_service(name)
         return result
+
+    def extra_help(self, command):
+        help_command = {
+            'status': {
+                'title': 'Overall Status',
+                'mrkdwn_in': ['text'],
+                'text': ('Overall Status gives you statistics about your services. ' +
+                         'It includes _Round trip time_, _Response Time_, ' +
+                         '_Status Code_ and _Status of location_. To get ' +
+                         'the status of a service you simply do `sdbot services status serviceName`'),
+                'color': COLOR
+            },
+            'find': {
+                'title': 'Finding a Service',
+                'mrkdwn_in': ['text'],
+                'text': ('With this command you can find a service with the command ' +
+                         '`sdbot services find serviceName`. The service name in ' +
+                         'this case may be using regex to find the services you are after'),
+                'color': COLOR
+            },
+            'list': {
+                'title': 'Listing Services',
+                'mrkdwn_in': ['text'],
+                'text': ('To get an overview of the services you have you can ' +
+                         'list them with `sdbot services list <no>`. `<no>` ' +
+                         'is in this case a number. If you leave it out I will ' +
+                         'list the first 5 services.'),
+                'color': COLOR
+            }
+        }
+
+        if command == 'status':
+            helptext = [help_command['status']]
+        elif command == 'find':
+            helptext = [help_command['find']]
+        elif command == 'list':
+            helptext = [help_command['list']]
+        elif command == 'help':
+            helptext = [attachment for attachment in help_command.values()]
+        return helptext, ''
 
     def _service_formatting(self, http, tcp):
         slack_http = [{
@@ -236,7 +278,7 @@ def on_message(msg, server):
         return
     command, name = match[0]
     name = name.strip()
-    if not name and command != 'list':
+    if not name and command not in ['list', 'help']:
         text = ('It looks like you forgot to add a name, ' +
                 'try `sdbot services {} serviceName`'.format(command))
         return text
