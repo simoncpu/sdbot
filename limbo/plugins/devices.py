@@ -119,9 +119,6 @@ class Wrapper(BaseWrapper):
                     yield [key] + result
 
     def get_available(self, name):
-        name = name.strip()
-        if not name:
-            return 'It looks like you forgot to add a name, try `sdbot devices available deviceName`'
         devices = self.device.list()
         _id = self.find_id(name, [], devices)
 
@@ -149,6 +146,11 @@ def on_message(msg, server):
 
     command, unclean_metrics, _, name = match[0]
     name = name.strip()
+    if not name:
+        text = ('It looks like you forgot to add a name, ' +
+                'try `sdbot devices {} {} deviceName`'.format(command, unclean_metrics))
+        return text
+
     metrics = unclean_metrics.split('for')[0].strip()
     if command not in COMMANDS:
         text = ('I\'m sorry, but couldn\'t quite understand you there, perhaps' +
