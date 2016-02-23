@@ -84,7 +84,7 @@ class Wrapper(BaseWrapper):
             helptext = [attachment for attachment in help_command.values()]
         return helptext, ''
 
-    def _service_formatting(self, http, tcp):
+    def _format_services(self, http, tcp):
         slack_http = [{
             'text': '*Service Name*: {}'.format(service['name']),
             'color': COLOR,
@@ -164,7 +164,7 @@ class Wrapper(BaseWrapper):
         http = [s for s in services_trunc if s['checkType'] == 'http']
         tcp = [s for s in services_trunc if s['checkType'] == 'tcp']
 
-        formatted = self._service_formatting(http, tcp)
+        formatted = self._format_services(http, tcp)
         message = ('You have {} services, if you would like to'.format(len(services)) +
                    ' list more than these {} services, use '.format(len(services_trunc)) +
                    '`sdbot services list <no>`')
@@ -178,7 +178,7 @@ class Wrapper(BaseWrapper):
         tcp = [s for s in services if s['checkType'] == 'tcp' and
                re.search(name, s['name'])]
 
-        return self._service_formatting(http, tcp), ''
+        return self._format_services(http, tcp), ''
 
     def get_value(self, name):
         services = self.service.list()
