@@ -31,7 +31,7 @@ class Wrapper(BaseWrapper):
         self.server = server
         self.msg = msg
 
-    def results_of(self, command, name, period):
+    def results_of(self, command, name):
         if command == 'value':
             result = self.get_value(name)
         elif command == 'status':
@@ -131,10 +131,15 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"^sdbot services (\b\w+\b)\s?(\b\w+\b)?\s?(\b\w+\b)?", text)
+    match = re.findall(r"^sdbot services (\b\w+\b)\s?(\b\w+\b)?", text)
     if not match:
         return
-    command, name, period = match[0]
+    command, name = match[0]
+    name = name.strip()
+    if not name:
+        text = ('It looks like you forgot to add a name, ' +
+                'try `sdbot services {} serviceName`'.format(command))
+        return text
 
     if command not in COMMANDS:
         text = ('I\'m sorry, but couldn\'t quite understand you there, perhaps' +
@@ -143,7 +148,7 @@ def on_message(msg, server):
         return text
 
     api = Wrapper(msg, server)
-    results, message = api.results_of(command, name, period)
+    results, message = api.results_of(command, name)
     if isinstance(results, list):
         kwargs = {
             'attachments': json.dumps(results),
