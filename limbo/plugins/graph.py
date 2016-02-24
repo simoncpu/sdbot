@@ -10,6 +10,7 @@ import json
 import re
 import io
 import time
+import importlib
 from datetime import timedelta
 from datetime import datetime
 
@@ -27,7 +28,7 @@ import parsedatetime
 from limbo.plugins.common.basewrapper import BaseWrapper
 
 COLOR = "#E8A824"
-COMMANDS = ['graph']
+COMMANDS = ['graph', 'help']
 
 
 class Wrapper(BaseWrapper):
@@ -39,7 +40,11 @@ class Wrapper(BaseWrapper):
         self.msg = msg
 
     def results_of(self, metrics, name, period):
-        result = self.get_metrics(metrics, name, period)
+        if name == 'help':
+            mod = importlib.import_module('limbo.plugins.graph')
+            result = [json.loads(mod.__doc__)]
+        else:
+            result = self.get_metrics(metrics, name, period)
         return result
 
     def create_graph(self, device):
@@ -188,7 +193,7 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"^sdbot graph ((\.?[A-Za-z.\s()]+){1,3} for)\s?(.*)", text)
+    match = re.findall(r"^sdbot graph ((\.?[A-Za-z.\s()]+){1,3} for)?\s?(.*)", text)
     if not match:
         return
     _, metrics, name_period = match[0]
