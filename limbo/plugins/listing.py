@@ -1,4 +1,4 @@
-"""{
+hide = """{
     "title": "list  <command>",
     "text": "You can list things like `open alerts`, `devices` or `services`. For each command there are more options, to see them write `sdbot list <command> help`",
     "mrkdwn_in": ["text"],
@@ -156,7 +156,7 @@ class Wrapper(BaseWrapper):
                 'mrkdwn_in': ['text'],
                 'text': ('The full command for `open alerts` is `open alerts' +
                          ' <type> <name>` where `type` is either a `device`' +
-                         ', `service` or `group`. `name` is the name of that ' +
+                         ', `service` or a `group`. `name` is the name of that ' +
                          'entity. Both `type` and `name` is optional. If ' +
                          'none is used I will give you 5 alerts by default, ' +
                          'if you want all alerts write `list open alerts all` ' +
@@ -195,12 +195,14 @@ class Wrapper(BaseWrapper):
         params = {
             'filter': {'fixed': False}
         }
-        not_valid = ['group', 'all']
-
-        if typeof and typeof not in not_valid:
+        valid = ['service', 'device']
+        if typeof and typeof in valid:
             params['filter']['config.subjectType'] = typeof
-        if typeof == 'group':
+        elif typeof == 'group':
             params['filter']['subjectGroup'] = typeof
+        else:
+            text = 'Instead of `{}` you should have used `group`, `service`, `device` or `all`'.format(typeof), ''
+            return text
 
         services = self.service.list()
         devices = self.device.list()
@@ -265,6 +267,8 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
+    return  # Code above is currently deprecated, revisit to implement alias for listing
+
     match = re.findall(r"^sdbot list ((open)?\s?\b\w+\b)\s?(\b\w+\b)?\s?(\b\w+\b)?", text)
     if not match:
         return
