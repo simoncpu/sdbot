@@ -7,3 +7,7 @@ config:
     friendly_name: Token
     info: The Server Density Auth Token
     type: secret
+  - name: SD_ACCOUNT_NAME
+    friendly_name: Account Name
+    info: The account name you at Server Density ie myaccount in myaccount.serverdensity.io
+    type: text
