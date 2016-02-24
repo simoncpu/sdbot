@@ -1,28 +1,36 @@
-# Limbo
-### A [Slack](https://slack.com/) chatbot
+# sdbot 
+### A [Slack](https://slack.com/) chatbot for [Server Density](https://www.serverdensity.com)
 
-![](https://travis-ci.org/llimllib/limbo.svg?branch=master)
+![](https://www.serverdensity.com/assets/images/slackbot/collaboration.gif)
+
 
 ## Installation
 
 1. Clone the repo
 2. [Create a bot user](https://my.slack.com/services/new/bot) if you don't have one yet, and copy the API Token
 3. export SLACK_TOKEN="your-api-token"
-4. `make run` (or `make repl` for local testing)
-5. Invite Limbo into any channels you want it in, or just message it in #general. Try typing `!gif dubstep cat` to test it out
+4. export SD_AUTH_TOKEN="your-server-density-token"
+5. export SD_ACCOUNT_NAME="server-density-account-name"
+6. `make run` (or `make repl` for local testing)
+7. Invite sdbot into any channels you want it in. Try typing `sdbot help` to test it out.
 
-![kitten mittens](http://i.imgur.com/xhmD6QO.png)
+You could also install docker and use the docker file to run sdbot.
+
+## Prerequisites
+When you run `make run` it'll try to install matplotlib. Matplotlib depends on `libpng`, `pkg-config` and `freetype`. These needs to be installed before you can install matplotlib. 
 
 ## Command Arguments
 
-* --test, -t: Enter command line mode to enter a limbo repl.
+* --test, -t: Enter command line mode to enter a sdbot repl.
 * --hook: Specify the hook to test. (Defaults to "message").
 * -c: Run a single command.
-* --database, -d: Where to store the limbo tinydb database. Defaults to log.json.
-* --pluginpath, -pp: The path where limbo should look to find its plugins (defaults to /plugins).
+* --database, -d: Where to store the sdbot tinydb database. Defaults to log.json.
+* --pluginpath, -pp: The path where sdbot should look to find its plugins (defaults to /plugins).
 
 ## Environment Variables
 
+* SD_AUTH_TOKEN: A Server Density Token. Required.
+* SD_ACCOUNT_NAME: Your account name at Server Density. Recommended
 * SLACK_TOKEN: Slack API token. Required.
 * LIMBO_LOGLEVEL: The logging level. Defaults to INFO.
 * LIMBO_LOGFILE: File to log info to. Defaults to none.
@@ -31,30 +39,14 @@
 
 ## Commands
 
-It's super easy to add your own commands! Just create a python file in the plugins directory with an `on_message` function that returns a string.
+It's very easy to extend sdbot and add your own commands. Just create a python file in the plugins directory with an `on_message` function that returns a string.
 
-You can use the `!help` command to print out all available commands and a brief help message about them. `!help <plugin>` will return just the help for a particular plugin.
-
-These are the current default plugins:
-
-* [calc](https://github.com/llimllib/limbo/wiki/Calc-Plugin)
-* [emoji](https://github.com/llimllib/limbo/wiki/Emoji-Plugin)
-* [flip](https://github.com/llimllib/limbo/wiki/Flip-Plugin)
-* [gif](https://github.com/llimllib/limbo/wiki/Gif-Plugin)
-* [google](https://github.com/llimllib/limbo/wiki/Google-Plugin)
-* [help](https://github.com/llimllib/limbo/wiki/Help-Plugin)
-* [image](https://github.com/llimllib/limbo/wiki/Image-Plugin)
-* [map](https://github.com/llimllib/limbo/wiki/Map-Plugin)
-* [stock](https://github.com/llimllib/limbo/wiki/Stock-Plugin)
-* [stockphoto](https://github.com/llimllib/limbo/wiki/Stock-Photo-Plugin)
-* [urban](https://github.com/llimllib/limbo/wiki/Urban)
-* [weather](https://github.com/llimllib/limbo/wiki/Weather-Plugin)
-* [wiki](https://github.com/llimllib/limbo/wiki/Wiki-Plugin)
-* [youtube](https://github.com/llimllib/limbo/wiki/Youtube-Plugin)
+You can use the `sdbot help` command to print out all available commands and a brief help message about them. 
 
 ---
 
 ## Contributors
+A kind thank you to [Limbo](https://github.com/llimllib/limbo) and the persons who contributed to that. 
 
 * [@fsalum](https://github.com/fsalum)
 * [@rodvodka](https://github.com/rodvodka)
