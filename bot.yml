@@ -1,7 +1,8 @@
 name: sdbot
 description: A bot that gives the user joy to use Server Density
 avatar: assets/sdlogo.png
-background:
+background: assets/dashboard.jpg
+screenshot: assets/collaboration.gif
 config:
   - name: SD_AUTH_TOKEN
     friendly_name: Token
