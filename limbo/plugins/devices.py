@@ -23,7 +23,9 @@ class Wrapper(BaseWrapper):
         self.metrics = Metrics(self.token)
 
     def results_of(self, command, metrics, name):
-        if command == 'find':
+        if command == 'help' or name == 'help':
+            result = self.extra_help(command)
+        elif command == 'find':
             result = self.find_device(name)
         elif command == 'value':
             result = self.get_value(name, metrics)
@@ -38,36 +40,34 @@ class Wrapper(BaseWrapper):
             'value': {
                 'title': 'Latest Value for a Device',
                 'mrkdwn_in': ['text'],
-                'text': ('Overall Status gives you statistics about your services. ' +
-                         'It includes _Round trip time_, _Response Time_, ' +
-                         '_Status Code_ and _Status of location_. To get ' +
-                         'the status of a service you simply do `sdbot services status serviceName`'),
+                'text': ('To get the latest value for a device you can use the ' +
+                         'command `sdbot devices metric.here for deviceName`. ' +
+                         'The metrics need to be separated by dots.'),
                 'color': COLOR
             },
             'find': {
                 'title': 'Finding a Device',
                 'mrkdwn_in': ['text'],
-                'text': ('With this command you can find a service with the command ' +
-                         '`sdbot services find serviceName`. The service name in ' +
-                         'this case may be using regex to find the services you are after'),
+                'text': ('With this command you can find a device with the command ' +
+                         '`sdbot devices find deviceName`. The device name in ' +
+                         'this case may be using regex to find the devices you are after'),
                 'color': COLOR
             },
             'list': {
                 'title': 'Listing Devices',
                 'mrkdwn_in': ['text'],
-                'text': ('To get an overview of the services you have you can ' +
-                         'list them with `sdbot services list <no>`. `<no>` ' +
+                'text': ('To get an overview of the devices you have you can ' +
+                         'list them with `sdbot devices list <no>`. `<no>` ' +
                          'is in this case a number. If you leave it out I will ' +
-                         'list the first 5 services.'),
+                         'list the first 5 devices.'),
                 'color': COLOR
             },
             'available': {
                 'title': 'Available Metrics',
                 'mrkdwn_in': ['text'],
-                'text': ('To get an overview of the services you have you can ' +
-                         'list them with `sdbot services list <no>`. `<no>` ' +
-                         'is in this case a number. If you leave it out I will ' +
-                         'list the first 5 services.'),
+                'text': ('To get all the available metrics for a device you can ' +
+                         'use `sdbot devices available deviceName`. This will ' +
+                         'give you a list of metrics that you use for latest value or graphs'),
                 'color': COLOR
             }
         }
