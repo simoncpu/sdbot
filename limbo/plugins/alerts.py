@@ -1,6 +1,6 @@
 """{
-    "title": "alerts <command>",
-    "text": "There is one command `list`, this will list the open alerts. To see how to fully use this use `sdbot alerts help`",
+    "title": "alerts <argument>",
+    "text": "The `list` argument will display the open alerts. For instructions on how to use this, type `sdbot alerts help`.",
     "mrkdwn_in": ["text"],
     "color": "#3EB891"
 }"""
@@ -38,12 +38,11 @@ class Wrapper(BaseWrapper):
                 'title': 'List Open Alerts',
                 'mrkdwn_in': ['text'],
                 'text': ('The full command for alerts is `sdbot alerts list' +
-                         ' <type> <name>` where `type` is either the word `device`' +
-                         ', `service` or `group`. `name` is the name of that ' +
-                         'entity. Both `type` and `name` is optional. If ' +
-                         'none is used I will give you 5 alerts by default, ' +
-                         'if you want all alerts write `alerts list all` ' +
-                         'instead.'),
+                         ' <type> <name>`, where `type` is either the word `device`' +
+                         ', `service` or `group`. The argument `name` corresponds to the ' +
+                         'name of that entity. Both `type` and `name` are optional. If ' +
+                         'none is used I will give you 5 alerts by default. ' +
+                         'If you want all alerts write, type `sdbot alerts list all`.'),
                 'color': COLOR
             }
         }

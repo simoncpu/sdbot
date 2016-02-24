@@ -1,6 +1,6 @@
 """{
-    "title": "devices <command> <name>",
-    "text": "You can get more info about your services through commands such as `find`, `value`, `available` or `list`. Get more help about each command by using help: `sdbot devices help`",
+    "title": "devices <argument> <name>",
+    "text": "You can get more info about your devices using arguments like `find`, `value`, `available` or `list`. To get more help about each argument, type `sdbot devices help`",
     "mrkdwn_in": ["text"],
     "color": "#E83880"
 }"""
@@ -40,34 +40,34 @@ class Wrapper(BaseWrapper):
             'value': {
                 'title': 'Latest Value for a Device',
                 'mrkdwn_in': ['text'],
-                'text': ('To get the latest value for a device you can use the ' +
-                         'command `sdbot devices metric.here for deviceName`. ' +
+                'text': ('To get the latest value for a device, type ' +
+                         '`sdbot devices metric.here for deviceName`. ' +
                          'The metrics need to be separated by dots.'),
                 'color': COLOR
             },
             'find': {
-                'title': 'Finding a Device',
+                'title': 'Find a Device',
                 'mrkdwn_in': ['text'],
-                'text': ('With this command you can find a device with the command ' +
-                         '`sdbot devices find deviceName`. The device name in ' +
-                         'this case may be using regex to find the devices you are after'),
+                'text': ('To find a device type ' +
+                         '`sdbot devices find deviceName`. I can also accept regex for the argument `deviceName`. ' +
+                         'For example `sdbot devices find 2$`.'),
                 'color': COLOR
             },
             'list': {
-                'title': 'Listing Devices',
+                'title': 'List Devices',
                 'mrkdwn_in': ['text'],
-                'text': ('To get an overview of the devices you have you can ' +
-                         'list them with `sdbot devices list <no>`. `<no>` ' +
-                         'is in this case a number. If you leave it out I will ' +
+                'text': ('To get a list of your devices type, ' +
+                         '`sdbot devices list <no>`. In this case `<no>` ' +
+                         'a number. If you leave it out I will ' +
                          'list the first 5 devices.'),
                 'color': COLOR
             },
             'available': {
                 'title': 'Available Metrics',
                 'mrkdwn_in': ['text'],
-                'text': ('To get all the available metrics for a device you can ' +
-                         'use `sdbot devices available deviceName`. This will ' +
-                         'give you a list of metrics that you use for latest value or graphs'),
+                'text': ('To get all the available metrics for a device, type ' +
+                         '`sdbot devices available deviceName`. This will ' +
+                         'display a list of metrics you can use for the command `devices value` or `graph`'),
                 'color': COLOR
             }
         }

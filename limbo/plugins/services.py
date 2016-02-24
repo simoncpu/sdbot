@@ -1,6 +1,6 @@
 """{
-    "title": "services <command> <name>",
-    "text": "You can get more info about your services through commands such as `status`, `find` or `list`. Get more help about the commands by using help: `sdbot services help`",
+    "title": "services <argument> <name>",
+    "text": "You can get more info about your services, using the `status`, `find` or `list` arguments. For more information, type `sdbot services help`.",
     "mrkdwn_in": ["text"],
     "color": "#8E44AD"
 }"""
@@ -49,26 +49,25 @@ class Wrapper(BaseWrapper):
             'status': {
                 'title': 'Overall Status',
                 'mrkdwn_in': ['text'],
-                'text': ('Overall Status gives you statistics about your services. ' +
+                'text': ('Overall Status displays statistics about your services. ' +
                          'It includes _Round trip time_, _Response Time_, ' +
                          '_Status Code_ and _Status of location_. To get ' +
-                         'the status of a service you simply do `sdbot services status serviceName`'),
+                         'the status of a service you can type `sdbot services status serviceName`'),
                 'color': COLOR
             },
             'find': {
-                'title': 'Finding a Service',
+                'title': 'Find a Service',
                 'mrkdwn_in': ['text'],
-                'text': ('With this command you can find a service with the command ' +
-                         '`sdbot services find serviceName`. The service name in ' +
-                         'this case may be using regex to find the services you are after'),
+                'text': ('You can find a service by typing `sdbot services find serviceName`. ' +
+                         'I can also accept regex for the argument `serviceName`. ' +
+                         'For example `sdbot services find 2$`.'),
                 'color': COLOR
             },
             'list': {
-                'title': 'Listing Services',
+                'title': 'List All Services',
                 'mrkdwn_in': ['text'],
-                'text': ('To get an overview of the services you have you can ' +
-                         'list them with `sdbot services list <no>`. `<no>` ' +
-                         'is in this case a number. If you leave it out I will ' +
+                'text': ('For a list of all services, type `sdbot services list <no>`.' +
+                         'In this case `<no>` is a number. If you leave it out I will ' +
                          'list the first 5 services.'),
                 'color': COLOR
             }
