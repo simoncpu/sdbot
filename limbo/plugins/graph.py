@@ -58,7 +58,7 @@ class Wrapper(BaseWrapper):
         bgcolor = '#f3f6f6'
 
         font = {
-            'size': 10,
+            'size': 11,
             'family': 'Arial'
         }
         plt.rc('font', **font)
@@ -193,7 +193,7 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"^sdbot graph ((\.?[A-Za-z.\s()]+){1,3} for)?\s?(.*)", text)
+    match = re.findall(r"^[sS][dD][bB]ot graph ((\.?[A-Za-z.\s()]+){1,3} for)?\s?(.*)", text)
     if not match:
         return
     _, metrics, name_period = match[0]

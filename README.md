@@ -1,4 +1,4 @@
-# sdbot 
+# SDBot 
 ### A [Slack](https://slack.com/) chatbot for [Server Density](https://www.serverdensity.com)
 
 ![](https://www.serverdensity.com/assets/images/slackbot/collaboration.gif)
@@ -18,6 +18,9 @@ You could also install docker and use the docker file to run sdbot.
 
 ## Prerequisites
 When you run `make run` it'll try to install matplotlib. Matplotlib depends on `libpng`, `pkg-config` and `freetype`. These needs to be installed before you can install matplotlib. 
+
+## Launching the bot into the wild
+The easiest way to host your snowflake of SDBot is to use [BeepBoop](http://beepboophq.com/). We're just about allow, a slack button integration. So keep checking back either here or where we [introduced our slackbot](https://www.serverdensity.com/slackbot). BeepBoop has their [docs right here](https://beepboophq.com/docs). 
 
 ## Command Arguments
 

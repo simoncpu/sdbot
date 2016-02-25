@@ -272,7 +272,7 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"^sdbot services? (\b\w+\b)\s?(\b\w+\b)?", text)
+    match = re.findall(r"^[sS][dD][bB]ot services? (\b\w+\b)\s?(\b\w+\b)?", text)
     if not match:
         return
     command, name = match[0]

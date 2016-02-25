@@ -215,7 +215,7 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
-    match = re.findall(r"^sdbot devices? (\b\w+\b)\s?((\.?[A-Za-z.\s()]+){1,3} for)?\s?(.*)?", text)
+    match = re.findall(r"^[sS][dD][bB]ot devices? (\b\w+\b)\s?((\.?[A-Za-z.\s()]+){1,3} for)?\s?(.*)?", text)
     if not match:
         return
 
