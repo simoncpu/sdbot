@@ -18,7 +18,7 @@ from serverdensity.wrapper import Metrics
 from serverdensity.wrapper import Device
 
 from matplotlib.dates import AutoDateLocator
-from matplotlib.dates import AutoDateFormatter
+from matplotlib.dates import DateFormatter
 from matplotlib import pyplot as plt
 import numpy as np
 
@@ -47,10 +47,10 @@ class Wrapper(BaseWrapper):
             result = self.get_metrics(metrics, name, period)
         return result
 
-    def create_graph(self, device):
+    def create_graph(self, device, difference):
 
         # 800 and 355 pixels.
-        ticks = 4
+        ticks = 5
         width = 8
         height = 3.55
 
@@ -58,10 +58,22 @@ class Wrapper(BaseWrapper):
         bgcolor = '#f3f6f6'
 
         font = {
-            'size': 11,
+            'size': 16,
             'family': 'Arial'
         }
         plt.rc('font', **font)
+
+        diff_sec = int(difference.total_seconds())
+
+        if diff_sec < 86400:
+            x_no_ticks = 10
+            fmt = '%H:%M'
+        elif (3600*24) < diff_sec and diff_sec < (3600*24*4):
+            x_no_ticks = 5
+            fmt = '%d %b, %H:%M'
+        elif (3600*24*4) < diff_sec:
+            x_no_ticks = 6
+            fmt = '%d %b %Y'
 
         # size of figure and setting background color
         fig = plt.gcf()
@@ -83,15 +95,9 @@ class Wrapper(BaseWrapper):
         yloc = plt.MaxNLocator(ticks)
         ax.yaxis.set_major_locator(yloc)
 
-
-        x_no_ticks = 8
         # Deciding how many ticks we want on the graph
-        locator = AutoDateLocator(maxticks=x_no_ticks)
-        formatter = AutoDateFormatter(locator)
-        # Formatter always chooses the most granular since we have granular dates
-        # either change format or round dates depending on how granular
-        # we want them to be for different date ranges.
-        formatter.scaled[1/(24.*60.)] = '%d/%m %H:%M'
+        locator = AutoDateLocator(minticks=(x_no_ticks - 2), maxticks=x_no_ticks)
+        formatter = DateFormatter(fmt)
 
         ax.xaxis.set_major_locator(locator)
         ax.xaxis.set_major_formatter(formatter)
@@ -127,6 +133,7 @@ class Wrapper(BaseWrapper):
         filename = 'graph-{}.png'.format(int(time.time()))
         with io.open(filename, 'wb') as f:
             f.write(buf.read())
+        plt.close()
         return filename
 
     def get_metrics(self, metrics, name, period):
@@ -162,7 +169,7 @@ class Wrapper(BaseWrapper):
             as_user=self.server.slack.server.username
         )
 
-        filename = self.create_graph(device)
+        filename = self.create_graph(device, now - past)
 
         attachment = [
             {
