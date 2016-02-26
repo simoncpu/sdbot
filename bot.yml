@@ -1,5 +1,5 @@
 name: sdbot
-description: A bot that gives the user joy to use Server Density
+description: SDBot can create graphs, list devices, show the latest status of all your services and show you your open alerts. To create your SDBot, sign in to BeepBoop and you'll be able to launch your version of SDBot and it will keep in sync with any changes that we make to SDBot
 avatar: assets/sdlogo.png
 background: assets/dashboard.jpg
 screenshot: assets/collaboration.gif

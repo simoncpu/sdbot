@@ -19,8 +19,12 @@ You could also install docker and use the docker file to run sdbot.
 ## Prerequisites
 When you run `make run` it'll try to install matplotlib. Matplotlib depends on `libpng`, `pkg-config` and `freetype`. These needs to be installed before you can install matplotlib. 
 
-## Launching the bot into the wild
-The easiest way to host your snowflake of SDBot is to use [BeepBoop](http://beepboophq.com/). We're just about allow, a slack button integration. So keep checking back either here or where we [introduced our slackbot](https://www.serverdensity.com/slackbot). BeepBoop has their [docs right here](https://beepboophq.com/docs). 
+## Get up to speed with SDBot
+If you don't want to host SDBot yourself you can launch an SDBot with the help of BeepBoop. Just visit the [public page](https://beepboophq.com/bots/e41db5a7aa3a4b59bf7c6c8fb77d8e13), sign in and you'll be able to launch SDBot to your slack team in just seconds! If you don't yet have an account at Server Density and would like to enjoy the tremendous advantages of having an SDBot to support your slack team. Visit [Server Density](https://www.serverdensity.com) to sign up. Creating an SDBot for your team is the next step! 
+
+If you are curious about what BeepBoop does you can always read their [documentation](https://beepboophq.com/docs)
+
+If you have any questions at all, just send an email to hello@serverdensity.com
 
 ## Command Arguments
 
