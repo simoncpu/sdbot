@@ -1,0 +1,22 @@
+{
+  "name": "SDBot",
+  "description": "A Slack chatbot for Server Density",
+  "keywords": [
+    "slack",
+    "serverdensity"
+  ],
+  "website": "https://www.serverdensity.com/slackbot/",
+  "repository": "https://github.com/serverdensity/sdbot",
+  "logo": "https://www.serverdensity.com/assets/images/slackbot/bot.png",
+  "env": {
+    "SLACK_TOKEN": {
+      "description": "The Slack bot Auth Token"
+    },
+    "SD_AUTH_TOKEN": {
+      "description": "The Server Density Auth Token"
+    },
+    "SD_ACCOUNT_NAME": {
+      "description": "The account name you at Server Density ie myaccount in myaccount.serverdensity.io"
+    }
+  }
+}
