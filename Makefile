@@ -15,7 +15,8 @@ run: install
 	bin/limbo
 
 .PHONY: prod_run
-run: bin/limbo
+prod_run:
+	bin/limbo
 
 .PHONY: repl
 repl: install
