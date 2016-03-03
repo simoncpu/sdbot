@@ -16,6 +16,8 @@
 
 You could also install docker and use the docker file to run sdbot.
 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 ## Prerequisites
 When you run `make run` it'll try to install matplotlib. Matplotlib depends on `libpng`, `pkg-config` and `freetype`. These needs to be installed before you can install matplotlib. 
 
