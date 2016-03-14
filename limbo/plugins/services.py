@@ -272,6 +272,8 @@ class Wrapper(BaseWrapper):
 
 def on_message(msg, server):
     text = msg.get("text", "")
+    text = Wrapper.clean_parsing(text)
+
     match = re.findall(r"^[sS][dD][bB]ot services? (\b\w+\b)\s?(\b\w+\b)?", text)
     if not match:
         return

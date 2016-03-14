@@ -1,5 +1,6 @@
 import os
 import time
+import re
 
 from pytz import timezone
 
@@ -10,6 +11,15 @@ class BaseWrapper(object):
             raise Exception('SD_AUTH_TOKEN is missing from environment')
         self.token = os.environ.get('SD_AUTH_TOKEN')
         self.timezone = timezone(os.environ.get('TIMEZONE', 'Europe/London'))
+
+    @classmethod
+    def clean_parsing(cls, string):
+        reg = '<http://((-?\w+-?\.?)+)\|(-?\w+-?\.?)+>'
+        match = re.search(reg, string)
+        if match:
+            clean_string = match.group(0)
+            string = string.replace(string[match.start():match.end()], clean_string)
+        return string
 
     def find_name(self, _id, services, devices):
         for s in services:
