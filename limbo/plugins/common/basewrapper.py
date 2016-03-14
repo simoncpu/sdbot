@@ -16,8 +16,9 @@ class BaseWrapper(object):
     def clean_parsing(cls, string):
         reg = '<http://((-?\w+-?\.?)+)\|(-?\w+-?\.?)+>'
         match = re.search(reg, string)
+
         if match:
-            clean_string = match.group(0)
+            clean_string = match.group(1)
             string = string.replace(string[match.start():match.end()], clean_string)
         return string
 
