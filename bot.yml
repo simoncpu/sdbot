@@ -1,5 +1,9 @@
 name: sdbot
-description: SDBot can create graphs, list devices, display the latest status of your services, and any open alerts. To create your SDBot, just sign in to Beep Boop and launch it from there. Beep Boop will then keep SDBot up to date with any changes we make on our end.
+description: > 
+            SDBot can create graphs, list devices, display the latest status of your services, and any open alerts. 
+            To create your SDBot, just sign in to Beep Boop and launch it from there. Beep Boop will then keep SDBot up to date with any changes we make on our end.
+            
+            Start using SDBot by inviting it to a channel. 
 avatar: assets/sdlogo.png
 background: assets/dashboard.jpg
 screenshot: assets/collaboration.gif
