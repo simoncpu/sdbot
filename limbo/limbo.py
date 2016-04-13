@@ -15,20 +15,104 @@ import json
 
 from slackrtm import SlackClient
 from slackrtm.server import SlackConnectionError, SlackLoginError
+
+from beepboop import resourcer
+from beepboop import bot_manager
+
 from .server import LimboServer
 from .fakeserver import FakeServer
+
+from .handlers import handle_event, bb_handlers, run_hook
+from .utils import (decode,
+                    encode,
+                    relevant_environ,
+                    strip_extension,
+                    getif)
 
 CURDIR = os.path.abspath(os.path.dirname(__file__))
 DIR = functools.partial(os.path.join, CURDIR)
 
-PYTHON3 = sys.version_info[0] > 2
-
 logger = logging.getLogger(__name__)
+
 
 class InvalidPluginDir(Exception):
     def __init__(self, plugindir):
         message = "Unable to find plugin dir {0}".format(plugindir)
         super(InvalidPluginDir, self).__init__(message)
+
+
+class Slackbot(object):
+    def __init__(self, server):
+        self.resource = None
+        self.server = server
+
+    def start(self, resource):
+        self.resource = resource
+        logger.debug("Started Bot for ResourceID: {}".format(
+            self.resource['resourceID'])
+        )
+
+        self.server.slack.rtm_connect()
+        self.loop()
+
+    def stop(self, resource):
+        logger.debug("Stopped Bot for ResourceID: {}".format(
+            self.resource['resourceID'])
+        )
+        self.server.slack.close()
+        # close connection to slack.
+
+    def loop(self, test_loop=None):
+        """Run the main loop
+        server is a limbo Server object
+        test_loop, if present, is a number of times to run the loop
+        """
+        try:
+            loops_without_activity = 0
+            while test_loop is None or test_loop > 0:
+                start = time.time()
+                loops_without_activity += 1
+
+                events = self.server.slack.rtm_read()
+                for event in events:
+                    loops_without_activity = 0
+                    logger.debug("got {0}".format(event.get("type", event)))
+                    response = handle_event(event, self.server)
+                    if response:
+                        if isinstance(event['channel'], dict):
+                            channel_id = event['channel']['id']
+                        else:
+                            channel_id = event['channel']
+                        self.server.slack.rtm_send_message(channel_id, response)
+
+                # Run the loop hook. This doesn't send messages it receives,
+                # because it doesn't know where to send them. Use
+                # server.slack.post_message to send messages from a loop hook
+                run_hook(self.server.hooks, "loop", self.server)
+
+                # The Slack RTM API docs say:
+                #
+                # > When there is no other activity clients should send a ping
+                # > every few seconds
+                #
+                # So, if we've gone >5 seconds without any activity, send a ping.
+                # If the connection has broken, this will reveal it so slack can
+                # quit
+                if loops_without_activity > 5:
+                    self.server.slack.server.ping()
+                    loops_without_activity = 0
+
+                end = time.time()
+                runtime = start - end
+                time.sleep(max(1-runtime, 0))
+
+                if test_loop:
+                    test_loop -= 1
+        except KeyboardInterrupt:
+            if os.environ.get("LIMBO_DEBUG"):
+                import pdb; pdb.set_trace()
+            raise
+
 
 def init_log(config):
     loglevel = config.get("loglevel", logging.INFO)
@@ -38,8 +122,6 @@ def init_log(config):
     else:
         logging.basicConfig(format=logformat, level=loglevel)
 
-def strip_extension(lst):
-    return (os.path.splitext(l)[0] for l in lst)
 
 def init_plugins(plugindir, plugins_to_load=None):
     if plugindir and not os.path.isdir(plugindir):
@@ -98,63 +180,6 @@ def init_plugins(plugindir, plugins_to_load=None):
     sys.path = oldpath
     return hooks
 
-def run_hook(hooks, hook, *args):
-    responses = []
-    for hook in hooks.get(hook, []):
-        try:
-            h = hook(*args)
-            if h:
-                responses.append(h)
-        except:
-            logger.warning("Failed to run plugin {0}, module not loaded".format(hook))
-            logger.warning("{0}".format(sys.exc_info()[0]))
-            logger.warning("{0}".format(traceback.format_exc()))
-    return responses
-
-def handle_bot_message(event, server):
-    try:
-        bot = server.slack.server.bots[event["bot_id"]]
-    except KeyError:
-        logger.debug("bot_message event {0} has no bot".format(event))
-        return
-
-    return "\n".join(run_hook(server.hooks, "bot_message", event, server))
-
-def handle_message(event, server):
-    subtype = event.get("subtype", "")
-    if subtype == "message_changed":
-        return
-
-    if subtype == "bot_message":
-        return handle_bot_message(event, server)
-
-    try:
-        msguser = server.slack.server.users[event["user"]]
-    except KeyError:
-        logger.debug("event {0} has no user".format(event))
-        return
-
-    return "\n".join(run_hook(server.hooks, "message", event, server))
-
-
-def handle_channel_joined(event, server):
-    temp = "".join(run_hook(server.hooks, "channel_joined", event, server))
-    return temp
-
-
-event_handlers = {
-    'message': handle_message,
-    'channel_joined': handle_channel_joined
-}
-
-def handle_event(event, server):
-    handler = event_handlers.get(event.get("type"))
-    if handler:
-        return handler(event, server)
-
-def getif(config, name, envvar):
-    if envvar in os.environ:
-        config[name] = os.environ.get(envvar)
 
 def init_config():
     config = {}
@@ -163,65 +188,9 @@ def init_config():
     getif(config, "logfile", "LIMBO_LOGFILE")
     getif(config, "logformat", "LIMBO_LOGFORMAT")
     getif(config, "plugins", "LIMBO_PLUGINS")
-
+    getif(config, "heroku", "LIMBO_ON_HEROKU")
     return config
 
-def loop(server, test_loop=None):
-    """Run the main loop
-
-    server is a limbo Server object
-    test_loop, if present, is a number of times to run the loop
-    """
-    try:
-        loops_without_activity = 0
-        while test_loop is None or test_loop > 0:
-            start = time.time()
-            loops_without_activity += 1
-
-            events = server.slack.rtm_read()
-            for event in events:
-                loops_without_activity = 0
-                logger.debug("got {0}".format(event.get("type", event)))
-                response = handle_event(event, server)
-                if response:
-                    if isinstance(event['channel'], dict):
-                        channel_id = event['channel']['id']
-                    else:
-                        channel_id = event['channel']
-                    server.slack.rtm_send_message(channel_id, response)
-
-            # Run the loop hook. This doesn't send messages it receives,
-            # because it doesn't know where to send them. Use
-            # server.slack.post_message to send messages from a loop hook
-            run_hook(server.hooks, "loop", server)
-
-            # The Slack RTM API docs say:
-            #
-            # > When there is no other activity clients should send a ping
-            # > every few seconds
-            #
-            # So, if we've gone >5 seconds without any activity, send a ping.
-            # If the connection has broken, this will reveal it so slack can
-            # quit
-            if loops_without_activity > 5:
-                server.slack.server.ping()
-                loops_without_activity = 0
-
-            end = time.time()
-            runtime = start - end
-            time.sleep(max(1-runtime, 0))
-
-            if test_loop:
-                test_loop -= 1
-    except KeyboardInterrupt:
-        if os.environ.get("LIMBO_DEBUG"):
-            import pdb; pdb.set_trace()
-        raise
-
-def relevant_environ():
-    return dict((key, os.environ[key])
-                for key in os.environ
-                if key.startswith("SLACK") or key.startswith("LIMBO"))
 
 def init_server(args, config, Server=LimboServer, Client=SlackClient):
     init_log(config)
@@ -250,19 +219,6 @@ export SLACK_TOKEN=<your-slack-bot-token>
     server = Server(slack, config, hooks, db)
     return server
 
-# decode a string. if str is a python 3 string, do nothing.
-def decode(str_, codec='utf8'):
-    if PYTHON3:
-        return str_
-    else:
-        return str_.decode(codec)
-
-# encode a string. if str is a python 3 string, do nothing.
-def encode(str_, codec='utf8'):
-    if PYTHON3:
-        return str_
-    else:
-        return str_.encode(codec)
 
 def main(args):
     config = init_config()
@@ -277,12 +233,20 @@ def main(args):
 
     server = init_server(args, config)
 
-    try:
-        server.slack.rtm_connect()
-        # run init hook. This hook doesn't send messages to the server (ought it?)
-        run_hook(server.hooks, "init", server)
+    def spawn_bot():
+        return Slackbot(server)
 
-        loop(server)
+    try:
+        # initialize bot runner.
+        if config.get('heroku'):
+            bot = spawn_bot()
+            bot.start()
+        else:
+            botManager = bot_manager.BotManager(spawn_bot)
+            bp = resourcer.Resourcer(botManager)
+            bp.handlers(bb_handlers)
+            bp.start()
+
     except SlackConnectionError:
         logger.warn("Unable to connect to Slack. Bad network?")
         raise
@@ -290,9 +254,11 @@ def main(args):
         logger.warn("Login Failed, invalid token <{0}>?".format(config["token"]))
         raise
 
-# run a command. cmd should be a unicode string (str in python3, unicode in python2).
-# returns a string appropriate for printing (str in py2 and py3)
+
 def run_cmd(cmd, server, hook, pluginpath, plugins_to_load):
+    """run a command. cmd should be a unicode string (str in python3, unicode in python2).
+       returns a string appropriate for printing (str in py2 and py3)"""
+
     server.hooks = init_plugins(pluginpath, plugins_to_load)
     event = {'type': hook, 'text': cmd, "user": "2", 'ts': time.time(), 'team': None, 'channel': 'repl_channel'}
     return encode(handle_event(event, server))
@@ -302,6 +268,7 @@ try:
     input = raw_input
 except NameError:
     pass
+
 
 def repl(server, args):
     try:
@@ -314,6 +281,7 @@ def repl(server, args):
     except (EOFError, KeyboardInterrupt):
         print()
         pass
+
 
 def init_db(database_file):
     return sqlite3.connect(database_file)
