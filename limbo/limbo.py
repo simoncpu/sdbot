@@ -26,8 +26,7 @@ from .handlers import handle_event, bb_handlers, run_hook
 from .utils import (decode,
                     encode,
                     relevant_environ,
-                    strip_extension,
-                    getif)
+                    strip_extension)
 from .settings import CONFIG
 
 
