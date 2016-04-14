@@ -28,6 +28,8 @@ from .utils import (decode,
                     relevant_environ,
                     strip_extension,
                     getif)
+from .settings import CONFIG
+
 
 CURDIR = os.path.abspath(os.path.dirname(__file__))
 DIR = functools.partial(os.path.join, CURDIR)
@@ -42,16 +44,103 @@ class InvalidPluginDir(Exception):
 
 
 class Slackbot(object):
-    def __init__(self, server):
+    def __init__(self, bot_token=None, ServerClass=LimboServer, Client=SlackClient, config=CONFIG):
         self.resource = None
-        self.server = server
+        self.server = None
+        if bot_token:
+            # using resource if no token
+            self.token = bot_token
+
+        self.ServerClass = ServerClass
+        self.Client = Client
+        self.config = config
+
+        self._init_log(config)
+        logger.debug("config: {0}".format(config))
+        config_plugins = config.get("plugins")
+        plugins_to_load = config_plugins.split(",") if config_plugins else []
+
+        # disable custom plugindir for now. In the future, input that through
+        # config instead. Replace None with something else later
+        self.hooks = self._init_plugins(None, plugins_to_load)
+
+    def _init_log(self, config):
+        loglevel = config.get("loglevel", logging.INFO)
+        logformat = config.get("logformat", '%(asctime)s:%(levelname)s:%(name)s:%(message)s')
+        if config.get("logfile"):
+            logging.basicConfig(filename=config.get("logfile"), format=logformat, level=loglevel)
+        else:
+            logging.basicConfig(format=logformat, level=loglevel)
+
+    def _init_plugins(self, plugindir, plugins_to_load=None):
+        if plugindir and not os.path.isdir(plugindir):
+            raise InvalidPluginDir(plugindir)
+
+        if not plugindir:
+            plugindir = DIR("plugins")
+
+        logger.debug("plugindir: {0}".format(plugindir))
+
+        if os.path.isdir(plugindir):
+            pluginfiles = glob(os.path.join(plugindir, "[!_]*.py"))
+            plugins = strip_extension(os.path.basename(p) for p in pluginfiles)
+        else:
+            # we might be in an egg; try to get the files that way
+            logger.debug("trying pkg_resources")
+            import pkg_resources
+            try:
+                plugins = strip_extension(
+                        pkg_resources.resource_listdir(__name__, "plugins"))
+            except OSError:
+                raise InvalidPluginDir(plugindir)
+
+        hooks = {}
+
+        oldpath = copy.deepcopy(sys.path)
+        sys.path.insert(0, plugindir)
+
+        for plugin in plugins:
+            if plugins_to_load and plugin not in plugins_to_load:
+                logger.debug("skipping plugin {0}, not in plugins_to_load {1}".format(plugin, plugins_to_load))
+                continue
+
+            logger.debug("plugin: {0}".format(plugin))
+            try:
+                mod = importlib.import_module(plugin)
+                modname = mod.__name__
+                for hook in re.findall("on_(\w+)", " ".join(dir(mod))):
+                    hookfun = getattr(mod, "on_" + hook)
+                    logger.debug("plugin: attaching %s hook for %s", hook, modname)
+                    hooks.setdefault(hook, []).append(hookfun)
+
+                if mod.__doc__:
+                    # firstline = mod.__doc__.split('\n')[0]
+                    part_attachment = json.loads(mod.__doc__)
+                    hooks.setdefault('help', {})[modname] = part_attachment
+                    hooks.setdefault('extendedhelp', {})[modname] = mod.__doc__
+
+            # bare except, because the modules could raise any number of errors
+            # on import, and we want them not to kill our server
+            except:
+                logger.warning("import failed on module {0}, module not loaded".format(plugin))
+                logger.warning("{0}".format(sys.exc_info()[0]))
+                logger.warning("{0}".format(traceback.format_exc()))
+
+        sys.path = oldpath
+        return hooks
 
     def start(self, resource):
         self.resource = resource
         logger.debug("Started Bot for ResourceID: {}".format(
             self.resource['resourceID'])
         )
+        if self.resource:
+            slack = self.Client(self.resource['resource']['SlackBotAccessToken'])
+        else:
+            slack = self.Client(self.token)
 
+        # Currently not supporting a database, might do later
+        self.server = self.ServerClass(slack, self.config, self.hooks, None)
         self.server.slack.rtm_connect()
         self.loop()
 
@@ -59,7 +148,7 @@ class Slackbot(object):
         logger.debug("Stopped Bot for ResourceID: {}".format(
             self.resource['resourceID'])
         )
-        self.server.slack.close()
+        self.server.slack = None
         # close connection to slack.
 
     def loop(self, test_loop=None):
@@ -114,85 +203,9 @@ class Slackbot(object):
             raise
 
 
-def init_log(config):
-    loglevel = config.get("loglevel", logging.INFO)
-    logformat = config.get("logformat", '%(asctime)s:%(levelname)s:%(name)s:%(message)s')
-    if config.get("logfile"):
-        logging.basicConfig(filename=config.get("logfile"), format=logformat, level=loglevel)
-    else:
-        logging.basicConfig(format=logformat, level=loglevel)
-
-
-def init_plugins(plugindir, plugins_to_load=None):
-    if plugindir and not os.path.isdir(plugindir):
-        raise InvalidPluginDir(plugindir)
-
-    if not plugindir:
-        plugindir = DIR("plugins")
-
-    logger.debug("plugindir: {0}".format(plugindir))
-
-    if os.path.isdir(plugindir):
-        pluginfiles = glob(os.path.join(plugindir, "[!_]*.py"))
-        plugins = strip_extension(os.path.basename(p) for p in pluginfiles)
-    else:
-        # we might be in an egg; try to get the files that way
-        logger.debug("trying pkg_resources")
-        import pkg_resources
-        try:
-            plugins = strip_extension(
-                    pkg_resources.resource_listdir(__name__, "plugins"))
-        except OSError:
-            raise InvalidPluginDir(plugindir)
-
-    hooks = {}
-
-    oldpath = copy.deepcopy(sys.path)
-    sys.path.insert(0, plugindir)
-
-    for plugin in plugins:
-        if plugins_to_load and plugin not in plugins_to_load:
-            logger.debug("skipping plugin {0}, not in plugins_to_load {1}".format(plugin, plugins_to_load))
-            continue
-
-        logger.debug("plugin: {0}".format(plugin))
-        try:
-            mod = importlib.import_module(plugin)
-            modname = mod.__name__
-            for hook in re.findall("on_(\w+)", " ".join(dir(mod))):
-                hookfun = getattr(mod, "on_" + hook)
-                logger.debug("plugin: attaching %s hook for %s", hook, modname)
-                hooks.setdefault(hook, []).append(hookfun)
-
-            if mod.__doc__:
-                # firstline = mod.__doc__.split('\n')[0]
-                part_attachment = json.loads(mod.__doc__)
-                hooks.setdefault('help', {})[modname] = part_attachment
-                hooks.setdefault('extendedhelp', {})[modname] = mod.__doc__
-
-        # bare except, because the modules could raise any number of errors
-        # on import, and we want them not to kill our server
-        except:
-            logger.warning("import failed on module {0}, module not loaded".format(plugin))
-            logger.warning("{0}".format(sys.exc_info()[0]))
-            logger.warning("{0}".format(traceback.format_exc()))
-
-    sys.path = oldpath
-    return hooks
-
-
-def init_config():
-    config = {}
-    getif(config, "token", "SLACK_TOKEN")
-    getif(config, "loglevel", "LIMBO_LOGLEVEL")
-    getif(config, "logfile", "LIMBO_LOGFILE")
-    getif(config, "logformat", "LIMBO_LOGFORMAT")
-    getif(config, "plugins", "LIMBO_PLUGINS")
-    getif(config, "heroku", "LIMBO_ON_HEROKU")
-    return config
-
-
 def init_server(args, config, Server=LimboServer, Client=SlackClient):
+    """Init_server should be deprecated"""
+    # note, key error should be added at main.
     init_log(config)
     logger.debug("config: {0}".format(config))
     db = init_db(args.database_name)
@@ -221,37 +234,37 @@ export SLACK_TOKEN=<your-slack-bot-token>
 
 
 def main(args):
-    config = init_config()
     if args.test:
-        init_log(config)
+        # FakeServer is not working at the moment.
+        init_log(CONFIG)
         return repl(FakeServer(), args)
     elif args.command is not None:
-        init_log(config)
+        init_log(CONFIG)
         cmd = decode(args.command)
-        print(run_cmd(cmd, FakeServer(), args.hook, args.pluginpath, config.get("plugins")))
+        print(run_cmd(cmd, FakeServer(), args.hook, args.pluginpath, CONFIG.get("plugins")))
         return
 
-    server = init_server(args, config)
-
-    def spawn_bot():
-        return Slackbot(server)
+    def spawn_bot(bot_token=None):
+        if bot_token:
+            return Slackbot(bot_token)
+        return Slackbot()
 
     try:
         # initialize bot runner.
-        if config.get('heroku'):
-            bot = spawn_bot()
-            bot.start()
-        else:
+        if CONFIG.get('beepboop'):
             botManager = bot_manager.BotManager(spawn_bot)
             bp = resourcer.Resourcer(botManager)
             bp.handlers(bb_handlers)
             bp.start()
-
+        else:
+            # need another except block for key error, unable to find slack_token
+            bot = spawn_bot(bot_token=CONFIG['token'])
+            bot.start()
     except SlackConnectionError:
         logger.warn("Unable to connect to Slack. Bad network?")
         raise
     except SlackLoginError:
-        logger.warn("Login Failed, invalid token <{0}>?".format(config["token"]))
+        logger.warn("Login Failed, invalid token <{0}>?".format(CONFIG["token"]))
         raise
 
 

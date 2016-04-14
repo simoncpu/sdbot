@@ -1,3 +1,4 @@
+import json
 import logging
 import sys
 import traceback
@@ -69,6 +70,10 @@ def bb_on_message(ws, message):
         message['type'], message))
 
 
+def bb_on_auth_result(ws, message):
+    logger.debug('Beepboop auth: {}'.format(json.dumps(message)))
+
+
 def bb_on_error(ws, error):
     logger.debug('Beepboop error: {}'.format(str(error)))
 
@@ -84,5 +89,6 @@ bb_handlers = {
     'on_open': bb_on_open,
     'on_message': bb_on_message,
     'on_error': bb_on_error,
-    'on_close': bb_on_close
+    'on_close': bb_on_close,
+    'on_auth_result': bb_on_auth_result
 }
