@@ -192,7 +192,7 @@ class Slackbot(object):
 
                 end = time.time()
                 runtime = start - end
-                time.sleep(max(1-runtime, 0))
+                time.sleep(max(1 - runtime, 0))
 
                 if test_loop:
                     test_loop -= 1
@@ -256,7 +256,6 @@ def main(args):
             bp.handlers(bb_handlers)
             bp.start()
         else:
-            # need another except block for key error, unable to find slack_token
             bot = spawn_bot(bot_token=CONFIG['token'])
             bot.start()
     except SlackConnectionError:
@@ -264,6 +263,19 @@ def main(args):
         raise
     except SlackLoginError:
         logger.warn("Login Failed, invalid token <{0}>?".format(CONFIG["token"]))
+        raise
+    except KeyError:
+        logger.error("""Unable to find a slack token. The environment variables
+limbo sees are:
+{0}
+
+and the current config is:
+{1}
+
+Try setting your bot's slack token with:
+
+export SLACK_TOKEN=<your-slack-bot-token>
+""".format(relevant_environ(), config))
         raise
 
 
