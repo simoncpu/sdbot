@@ -128,12 +128,12 @@ class Slackbot(object):
         sys.path = oldpath
         return hooks
 
-    def start(self, resource):
-        self.resource = resource
-        logger.debug("Started Bot for ResourceID: {}".format(
-            self.resource['resourceID'])
-        )
-        if self.resource:
+    def start(self, resource=None):
+        if resource:
+            self.resource = resource
+            logger.debug("Started Bot for ResourceID: {}".format(
+                self.resource['resourceID'])
+            )
             slack = self.Client(self.resource['resource']['SlackBotAccessToken'])
         else:
             slack = self.Client(self.token)
