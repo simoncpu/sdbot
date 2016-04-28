@@ -11,7 +11,7 @@ class BaseWrapper(object):
         self.server = server
         # todo
         if self.server.config.get('resource'):
-            self.token = self.server.config['resources']['SD_AUTH_TOKEN']
+            self.token = self.server.config['resource']['SD_AUTH_TOKEN']
         elif os.environ.get('SD_AUTH_TOKEN'):
             self.token = os.environ['SD_AUTH_TOKEN']
         else:

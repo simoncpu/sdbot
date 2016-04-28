@@ -19,8 +19,8 @@ COLOR = '#3EB891'
 
 
 class Wrapper(BaseWrapper):
-    def __init__(self):
-        super(Wrapper, self).__init__()
+    def __init__(self, msg, server):
+        super(Wrapper, self).__init__(msg, server)
         self.alert = Alert(self.token)
         self.device = Device(self.token)
         self.service = Service(self.token)
@@ -151,7 +151,7 @@ def on_message(msg, server):
                 ' you could try `list`, use `sdbot list help` to get more info.')
         return text
 
-    api = Wrapper()
+    api = Wrapper(msg, server)
     results, message = api.results_of(command, typeof, name)
     if isinstance(results, list):
         kwargs = {

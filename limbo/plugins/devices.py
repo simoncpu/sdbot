@@ -16,9 +16,10 @@ from limbo.plugins.common.basewrapper import BaseWrapper
 COMMANDS = ['find', 'value', 'available', 'list', 'help']
 COLOR = '#E83880'
 
+
 class Wrapper(BaseWrapper):
-    def __init__(self):
-        super(Wrapper, self).__init__()
+    def __init__(self, msg, server):
+        super(Wrapper, self).__init__(msg, server)
         self.device = Device(self.token)
         self.metrics = Metrics(self.token)
 
@@ -235,7 +236,7 @@ def on_message(msg, server):
                 '`available` or `list`')
         return text
 
-    api = Wrapper()
+    api = Wrapper(msg, server)
     results = api.results_of(command, metrics, name)
     if isinstance(results, list):
         kwargs = {

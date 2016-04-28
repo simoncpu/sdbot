@@ -24,12 +24,10 @@ COLOR = '#8E44AD'
 
 class Wrapper(BaseWrapper):
     def __init__(self, msg, server):
-        super(Wrapper, self).__init__()
+        super(Wrapper, self).__init__(msg, server)
         self.service = Service(self.token)
         self.metrics = Metrics(self.token)
         self.status = ServiceStatus(self.token)
-        self.server = server
-        self.msg = msg
 
     def results_of(self, command, name):
         if command == 'help' or name == 'help':

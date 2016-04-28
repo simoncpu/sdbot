@@ -33,11 +33,9 @@ COMMANDS = ['graph', 'help']
 
 class Wrapper(BaseWrapper):
     def __init__(self, msg, server):
-        super(Wrapper, self).__init__()
+        super(Wrapper, self).__init__(msg, server)
         self.metrics = Metrics(self.token)
         self.device = Device(self.token)
-        self.server = server
-        self.msg = msg
 
     def results_of(self, metrics, name, period):
         if name == 'help':
