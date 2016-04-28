@@ -250,6 +250,7 @@ def main(args):
 
     try:
         # initialize bot runner.
+        print(os.environ.keys())
         if CONFIG.get('beepboop'):
             botManager = bot_manager.BotManager(spawn_bot)
             bp = resourcer.Resourcer(botManager)
