@@ -6,10 +6,16 @@ from pytz import timezone
 
 
 class BaseWrapper(object):
-    def __init__(self):
-        if not os.environ.get('SD_AUTH_TOKEN'):
+    def __init__(self, msg, server):
+        self.msg = msg
+        self.server = server
+        # todo
+        if self.server.config.get('resource'):
+            self.token = self.server.config['resources']['SD_AUTH_TOKEN']
+        elif os.environ.get('SD_AUTH_TOKEN'):
+            self.token = os.environ['SD_AUTH_TOKEN']
+        else:
             raise Exception('SD_AUTH_TOKEN is missing from environment')
-        self.token = os.environ.get('SD_AUTH_TOKEN')
         self.timezone = timezone(os.environ.get('TIMEZONE', 'Europe/London'))
 
     @classmethod

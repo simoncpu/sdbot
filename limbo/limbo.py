@@ -135,6 +135,7 @@ class Slackbot(object):
                 self.resource['resourceID'])
             )
             slack = self.Client(self.resource['resource']['SlackBotAccessToken'])
+            self.config['resource'] = self.resource['resource']
         else:
             slack = self.Client(self.token)
 
