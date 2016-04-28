@@ -277,7 +277,7 @@ and the current config is:
 Try setting your bot's slack token with:
 
 export SLACK_TOKEN=<your-slack-bot-token>
-""".format(relevant_environ(), config))
+""".format(relevant_environ(), CONFIG))
         raise
 
 

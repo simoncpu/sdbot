@@ -18,7 +18,7 @@ coverage==3.7.1
 pyfiglet==0.7.4
 tox==2.0.1
 slackrtm==0.2.1
-sd-python-wrapper==0.1.30
+sd-python-wrapper==0.1.31
 matplotlib==1.5.0
 slacker==0.9.0
 parsedatetime==1.5

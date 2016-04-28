@@ -9,7 +9,7 @@ class BaseWrapper(object):
     def __init__(self, msg, server):
         self.msg = msg
         self.server = server
-        # todo
+
         if self.server.config.get('resource'):
             self.token = self.server.config['resource']['SD_AUTH_TOKEN']
         elif os.environ.get('SD_AUTH_TOKEN'):
