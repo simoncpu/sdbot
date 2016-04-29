@@ -200,7 +200,7 @@ def on_message(msg, server):
     text = msg.get("text", "")
     text = Wrapper.clean_parsing(text)
 
-    match = re.findall(r"^[sS][dD][bB]ot graph ((\.?[A-Za-z.\s()]+){1,3} for)?\s?(.*)", text)
+    match = re.findall(r"^[sS][dD][bB]ot graph ((\.?[\/0-9A-Za-z.\s\[\]\-()_]+){1,3} for)?\s?(.*)", text)
     if not match:
         return
     _, metrics, name_period = match[0]
