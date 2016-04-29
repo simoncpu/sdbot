@@ -160,7 +160,7 @@ class Wrapper(BaseWrapper):
             return text
 
         # creates file
-        slack = Slacker(os.environ.get('SLACK_TOKEN'))
+        slack = Slacker(self.server.config['resource']['SD_AUTH_TOKEN'])
         slack.chat.post_message(
             self.msg['channel'],
             'Preparing the graphs for you this very moment',
