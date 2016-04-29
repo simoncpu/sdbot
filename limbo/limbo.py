@@ -135,12 +135,14 @@ class Slackbot(object):
                 self.resource['resourceID'])
             )
             slack = self.Client(self.resource['resource']['SlackBotAccessToken'])
-            self.config['resource'] = self.resource['resource']
+            config = dict(self.config)
+            config['resource'] = self.resource['resource']
         else:
             slack = self.Client(self.token)
+            config = dict(self.config)
 
         # Currently not supporting a database, might do later
-        self.server = self.ServerClass(slack, self.config, self.hooks, None)
+        self.server = self.ServerClass(slack, config, self.hooks, None)
         self.server.slack.rtm_connect()
         self.loop()
 
