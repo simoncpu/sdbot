@@ -160,7 +160,10 @@ class Wrapper(BaseWrapper):
             return text
 
         # creates file
-        slack = Slacker(self.server.config['resource']['SlackBotAccessToken'])
+        try:
+            slack = Slacker(self.server.config['resource']['SlackBotAccessToken'])
+        except KeyError:
+            slack = Slacker(self.server.config['token'])
         slack.chat.post_message(
             self.msg['channel'],
             'Preparing the graphs for you this very moment',
